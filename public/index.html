@@ -1,0 +1,340 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Management System</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    >
+</head>
+
+<body>
+    <div class="app-container">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+
+                <div>
+                    <h2>EduManage</h2>
+                    <p>Student Portal</p>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="nav-section">
+                <p class="nav-label">MAIN MENU</p>
+
+                <a href="#dashboard" class="nav-link active" data-page="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="#students" class="nav-link" data-page="students">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Students</span>
+                </a>
+
+                <a href="#courses" class="nav-link" data-page="courses">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Courses</span>
+                </a>
+
+                <a href="#attendance" class="nav-link" data-page="attendance">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>Attendance</span>
+                </a>
+
+                <a href="#examinations" class="nav-link" data-page="examinations">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>Examinations</span>
+                </a>
+            </div>
+
+            <!-- Admin Profile -->
+            <div class="sidebar-bottom">
+                <div class="admin-profile">
+                    <div class="avatar">A</div>
+
+                    <div class="admin-info">
+                        <h4>Administrator</h4>
+                        <p>Admin Account</p>
+                    </div>
+
+                    <i class="fa-solid fa-ellipsis"></i>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Topbar -->
+            <header class="topbar">
+                <div>
+                    <p class="breadcrumb">Pages / Dashboard</p>
+                    <h1>Dashboard</h1>
+                </div>
+
+                <div class="topbar-actions">
+                    <button class="icon-button" aria-label="Notifications">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="notification-dot"></span>
+                    </button>
+
+                    <div class="profile-summary">
+                        <div class="avatar">A</div>
+
+                        <div>
+                            <h4>Admin User</h4>
+                            <p>Administrator</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div id="page-content">
+
+                <!-- Welcome Section -->
+                <section class="welcome-section">
+                    <div>
+                        <h2>Welcome back, Admin! 👋</h2>
+                        <p>
+                            Here's what's happening at your institution today.
+                        </p>
+                    </div>
+
+                    <button class="primary-button">
+                        <i class="fa-solid fa-plus"></i>
+                        Add Student
+                    </button>
+                </section>
+
+                <!-- Statistics -->
+                <section class="stats-grid">
+
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <span>Total Students</span>
+                            <div class="stat-icon purple">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                        </div>
+
+                        <h2>2,450</h2>
+
+                        <p class="stat-description">
+                            <span class="positive">+12.5%</span>
+                            compared to last month
+                        </p>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <span>Active Courses</span>
+                            <div class="stat-icon blue">
+                                <i class="fa-solid fa-book-open"></i>
+                            </div>
+                        </div>
+
+                        <h2>32</h2>
+
+                        <p class="stat-description">
+                            <span class="positive">+4.2%</span>
+                            compared to last month
+                        </p>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <span>Average Attendance</span>
+                            <div class="stat-icon green">
+                                <i class="fa-solid fa-calendar-check"></i>
+                            </div>
+                        </div>
+
+                        <h2>87.6%</h2>
+
+                        <p class="stat-description">
+                            <span class="positive">+2.8%</span>
+                            compared to last month
+                        </p>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <span>Pending Results</span>
+                            <div class="stat-icon orange">
+                                <i class="fa-solid fa-file-lines"></i>
+                            </div>
+                        </div>
+
+                        <h2>18</h2>
+
+                        <p class="stat-description">
+                            Examinations awaiting results
+                        </p>
+                    </article>
+
+                </section>
+
+                <!-- Recent Students -->
+                <section class="content-card">
+
+                    <div class="section-header">
+                        <div>
+                            <h2>Recent Students</h2>
+                            <p>Manage your recently registered students.</p>
+                        </div>
+
+                        <button class="secondary-button">
+                            View All
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>STUDENT</th>
+                                    <th>STUDENT ID</th>
+                                    <th>COURSE</th>
+                                    <th>STATUS</th>
+                                    <th>ACTION</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar purple">
+                                                RK
+                                            </div>
+
+                                            <div>
+                                                <h4>Rahul Kumar</h4>
+                                                <p>rahul@example.com</p>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>STU-2026-001</td>
+                                    <td>Computer Science</td>
+
+                                    <td>
+                                        <span class="status active-status">
+                                            Active
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <button
+                                            class="action-button"
+                                            aria-label="More actions for Rahul Kumar"
+                                        >
+                                            <i class="fa-solid fa-ellipsis"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar blue">
+                                                PS
+                                            </div>
+
+                                            <div>
+                                                <h4>Priya Sharma</h4>
+                                                <p>priya@example.com</p>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>STU-2026-002</td>
+                                    <td>Information Technology</td>
+
+                                    <td>
+                                        <span class="status active-status">
+                                            Active
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <button
+                                            class="action-button"
+                                            aria-label="More actions for Priya Sharma"
+                                        >
+                                            <i class="fa-solid fa-ellipsis"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar green">
+                                                AM
+                                            </div>
+
+                                            <div>
+                                                <h4>Aditya More</h4>
+                                                <p>aditya@example.com</p>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>STU-2026-003</td>
+                                    <td>Computer Science</td>
+
+                                    <td>
+                                        <span class="status inactive-status">
+                                            Inactive
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <button
+                                            class="action-button"
+                                            aria-label="More actions for Aditya More"
+                                        >
+                                            <i class="fa-solid fa-ellipsis"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </section>
+
+            </div>
+            <!-- End Page Content -->
+
+            <!-- Footer -->
+            <footer class="footer">
+                <p>© 2026 EduManage. Student Management System.</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+
+</body>
+</html>
