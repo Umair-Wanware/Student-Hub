@@ -3,7 +3,11 @@ const path = require("path");
 
 const app = express();
 
-const{
+// Routes
+const studentRoutes = require("./routes/studentRoutes");
+const authRoutes = require("./routes/authRoutes");
+
+const {
     notFoundHandler,
     errorHandler
 } = require("./middleware/errorHandler");
@@ -23,11 +27,9 @@ app.get("/api/health", (req, res) => {
     });
 });
 
-// Student routes
-const studentRoutes = require("./routes/studentRoutes");
-const { error } = require("console");
-
+// API routes
 app.use("/api/students", studentRoutes);
+app.use("/api/auth", authRoutes);
 
 // Handle unknown API routes
 app.use("/api", (req, res) => {
@@ -37,6 +39,9 @@ app.use("/api", (req, res) => {
     });
 });
 
-module.exports = app;
+// Handle other unknown routes and errors
 app.use(notFoundHandler);
 app.use(errorHandler);
+
+// Export the Express application
+module.exports = app;
