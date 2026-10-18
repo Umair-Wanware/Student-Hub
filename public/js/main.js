@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (currentHash === "tasks") renderTasksPage();
     };
 
-<<<<<<< HEAD
+HEAD
     window.deleteTask = (id) => {
         tasks = tasks.filter(t => t.id !== id);
         saveTasks();
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Render Dynamic Page Views
-=======
+
     let cachedStudents = [];
 
     function escapeHTML(value) {
@@ -269,7 +269,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
->>>>>>> refs/remotes/origin/main
     function showPage(page) {
         navLinks.forEach(link => {
             link.classList.toggle("active", link.dataset.page === page);
