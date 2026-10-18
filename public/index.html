@@ -36,9 +36,9 @@
                     <span>Assignments & Tasks</span>
                 </a>
 
-                <a href="#focus flow" class="nav-link" data-page="focus flow">
+                <a href="#focus zone" class="nav-link" data-page="focus zone">
                     <i class="fa-solid fa-stopwatch"></i>
-                    <span>Focus flow Timer</span>
+                    <span>Focus zone</span>
                 </a>
 
                 <a href="#attendance" class="nav-link" data-page="attendance">
@@ -103,11 +103,9 @@
                         <h2>Good day! 👋</h2>
                         <p>Study Smarter. Stay Organized. Achieve More.</p>
                     </div>
-
-                    <button class="primary-button">
-                        <i class="fa-solid fa-plus"></i>
-                        Add Student
-                    </button>
+                    <a href="#tasks" class="primary-button">
+                        <i class="fa-solid fa-plus"></i> Add New Task
+                    </a>
                 </section>
 
                 <!-- Statistics Grid -->
@@ -119,13 +117,8 @@
                                 <i class="fa-solid fa-clock"></i>
                             </div>
                         </div>
-
-                        <h2>2,450</h2>
-
-                        <p class="stat-description">
-                            <span class="positive">+12.5%</span>
-                            compared to last month
-                        </p>
+                        <h2 id="stat-pending-count">0</h2>
+                        <p class="stat-description">Assignments to complete</p>
                     </article>
 
                     <article class="stat-card">
@@ -174,119 +167,8 @@
                         </a>
                     </div>
 
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>STUDENT</th>
-                                    <th>STUDENT ID</th>
-                                    <th>COURSE</th>
-                                    <th>STATUS</th>
-                                    <th>ACTION</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="student-cell">
-                                            <div class="student-avatar purple">
-                                                RK
-                                            </div>
-
-                                            <div>
-                                                <h4>Rahul Kumar</h4>
-                                                <p>rahul@example.com</p>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <td>STU-2026-001</td>
-                                    <td>Computer Science</td>
-
-                                    <td>
-                                        <span class="status active-status">
-                                            Active
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        <button
-                                            class="action-button"
-                                            aria-label="More actions for Rahul Kumar"
-                                        >
-                                            <i class="fa-solid fa-ellipsis"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="student-cell">
-                                            <div class="student-avatar blue">
-                                                PS
-                                            </div>
-
-                                            <div>
-                                                <h4>Priya Sharma</h4>
-                                                <p>priya@example.com</p>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <td>STU-2026-002</td>
-                                    <td>Information Technology</td>
-
-                                    <td>
-                                        <span class="status active-status">
-                                            Active
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        <button
-                                            class="action-button"
-                                            aria-label="More actions for Priya Sharma"
-                                        >
-                                            <i class="fa-solid fa-ellipsis"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="student-cell">
-                                            <div class="student-avatar green">
-                                                AM
-                                            </div>
-
-                                            <div>
-                                                <h4>Aditya More</h4>
-                                                <p>aditya@example.com</p>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <td>STU-2026-003</td>
-                                    <td>Computer Science</td>
-
-                                    <td>
-                                        <span class="status inactive-status">
-                                            Inactive
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        <button
-                                            class="action-button"
-                                            aria-label="More actions for Aditya More"
-                                        >
-                                            <i class="fa-solid fa-ellipsis"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div id="dashboard-task-list" class="task-list-container">
+                        <!-- Dynamic Dashboard Tasks Rendered via JS -->
                     </div>
                 </section>
 
