@@ -6,6 +6,11 @@ const app = express();
 // Routes
 const studentRoutes = require("./routes/studentRoutes");
 const authRoutes = require("./routes/authRoutes");
+const taskRoutes = require("./routes/taskRoutes");
+const noteRoutes = require("./routes/noteRoutes");
+const attendanceRoutes = require("./routes/attendanceRoutes");
+const focusSessionRoutes = require("./routes/focusSessionRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const {
     notFoundHandler,
@@ -30,6 +35,11 @@ app.get("/api/health", (req, res) => {
 // API routes
 app.use("/api/students", studentRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/notes", noteRoutes);
+app.use("/api/attendance", attendanceRoutes);
+app.use("/api/focus-sessions", focusSessionRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Handle unknown API routes
 app.use("/api", (req, res) => {

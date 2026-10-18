@@ -1,108 +1,22 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // LocalStorage Initializers
-    let tasks = JSON.parse(localStorage.getItem("studysphere_tasks")) || [
-        { id: 1, title: "Data Structures Practical", subject: "CS201", dueDate: "2026-10-25", priority: "High", completed: false },
-        { id: 2, title: "Statistics Quiz Revision", subject: "STATS", dueDate: "2026-10-22", priority: "Medium", completed: true }
-    ];
-
-    let notes = JSON.parse(localStorage.getItem("studysphere_notes")) || [
-        { id: 1, title: "OS Deadlock Conditions", content: "1. Mutual Exclusion\n2. Hold & Wait\n3. No Preemption\n4. Circular Wait", date: "2026-10-17" }
-    ];
-
-    let attendanceData = JSON.parse(localStorage.getItem("studysphere_attendance")) || [
-        { id: 1, subject: "Computer Networks", attended: 18, total: 20 },
-        { id: 2, subject: "DBMS", attended: 15, total: 20 }
-    ];
-
-    // Pomodoro Timer Variables
-    let timerInterval = null;
-    let timeLeft = 25 * 60;
-    let isTimerRunning = false;
-
+    const API_BASE = "/api";
     const pageContent = document.getElementById("page-content");
-    const navLinks = document.querySelectorAll(".nav-link");
-    const themeToggleBtn = document.getElementById("theme-toggle");
-
-    // Save Data Helpers
-    const saveTasks = () => localStorage.setItem("studysphere_tasks", JSON.stringify(tasks));
-    const saveNotes = () => localStorage.setItem("studysphere_notes", JSON.stringify(notes));
-    const saveAttendance = () => localStorage.setItem("studysphere_attendance", JSON.stringify(attendanceData));
-
-    // Theme Switcher
-    themeToggleBtn.addEventListener("click", () => {
-        document.body.classList.toggle("dark-mode");
-        const icon = themeToggleBtn.querySelector("i");
-        if (document.body.classList.contains("dark-mode")) {
-            icon.className = "fa-solid fa-sun";
-        } else {
-            icon.className = "fa-solid fa-moon";
-        }
-    });
-
-    // Update Dashboard Stats Widget
-    function refreshStats() {
-        const pendingCount = tasks.filter(t => !t.completed).length;
-        const pendingElem = document.getElementById("stat-pending-count");
-        if (pendingElem) pendingElem.textContent = pendingCount;
-
-        const notesElem = document.getElementById("stat-notes-count");
-        if (notesElem) notesElem.textContent = notes.length;
-
-        const attElem = document.getElementById("stat-attendance-avg");
-        if (attElem) {
-            const totalAttended = attendanceData.reduce((acc, curr) => acc + curr.attended, 0);
-            const totalLectures = attendanceData.reduce((acc, curr) => acc + curr.total, 0);
-            const avg = totalLectures > 0 ? Math.round((totalAttended / totalLectures) * 100) : 0;
-            attElem.textContent = `${avg}%`;
-        }
-
-        renderDashboardTasks();
-    }
-
-    function renderDashboardTasks() {
-        const container = document.getElementById("dashboard-task-list");
-        if (!container) return;
-
-        const pending = tasks.filter(t => !t.completed).slice(0, 3);
-        if (pending.length === 0) {
-            container.innerHTML = `<p style="font-size: 12px; color: var(--muted);">No pending tasks! Enjoy your break. 🎉</p>`;
-            return;
-        }
-
-        container.innerHTML = pending.map(t => `
-            <div class="task-item">
-                <div class="task-left">
-                    <input type="checkbox" onchange="window.toggleTaskStatus(${t.id})" ${t.completed ? 'checked' : ''}>
-                    <div>
-                        <p class="task-title">${t.title}</p>
-                        <span class="task-meta">${t.subject} • Due: ${t.dueDate}</span>
-                    </div>
-                </div>
-                <span class="badge ${t.priority.toLowerCase()}">${t.priority}</span>
-            </div>
-        `).join("");
-    }
-
-    // Task Functions Globally Scoped
-    window.toggleTaskStatus = (id) => {
-        tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
-        saveTasks();
-        refreshStats();
-        const currentHash = window.location.hash.slice(1);
-        if (currentHash === "tasks") renderTasksPage();
+    const navLinks = [...document.querySelectorAll(".nav-link")];
+    const themeToggle = document.getElementById("theme-toggle");
+    const pageTitles = {
+        dashboard: "Dashboard",
+        tasks: "Assignments & Tasks",
+        "focus-zone": "Focus Zone",
+        attendance: "Attendance",
+        notes: "Quick Notes",
+        analytics: "Analytics"
     };
-
-HEAD
-    window.deleteTask = (id) => {
-        tasks = tasks.filter(t => t.id !== id);
-        saveTasks();
-        refreshStats();
-        renderTasksPage();
+    const focusState = {
+        duration: 25,
+        secondsRemaining: 25 * 60,
+        interval: null,
+        running: false
     };
-
-    // Render Dynamic Page Views
-
-    let cachedStudents = [];
 
     function escapeHTML(value) {
         return String(value ?? "").replace(/[&<>"']/g, character => ({
@@ -114,410 +28,539 @@ HEAD
         })[character]);
     }
 
-    function initials(name) {
-        return String(name || "?")
-            .trim()
-            .split(/\s+/)
-            .slice(0, 2)
-            .map(part => part.charAt(0).toUpperCase())
-            .join("");
+    function today() {
+        return new Date().toISOString().slice(0, 10);
     }
 
-    function studentCode(id) {
-        return `STU-${new Date().getFullYear()}-${String(id).padStart(3, "0")}`;
+    function formatDate(value) {
+        if (!value) return "No date";
+        const date = new Date(`${String(value).slice(0, 10)}T12:00:00`);
+        return Number.isNaN(date.getTime())
+            ? String(value)
+            : new Intl.DateTimeFormat(undefined, {
+                day: "numeric",
+                month: "short",
+                year: "numeric"
+            }).format(date);
     }
 
-    function studentRow(student, index) {
-        const avatarClasses = ["purple", "blue", "green", "orange"];
-        const avatarClass = avatarClasses[index % avatarClasses.length];
-
-        return `
-            <tr>
-                <td>
-                    <div class="student-cell">
-                        <div class="student-avatar ${avatarClass}">${escapeHTML(initials(student.name))}</div>
-                        <div>
-                            <h4>${escapeHTML(student.name)}</h4>
-                            <p>${escapeHTML(student.email)}</p>
-                        </div>
-                    </div>
-                </td>
-                <td>${escapeHTML(studentCode(student.id))}</td>
-                <td>${escapeHTML(student.course)}</td>
-                <td><span class="status active-status">Active</span></td>
-                <td>
-                    <button class="action-button" type="button"
-                        aria-label="More actions for ${escapeHTML(student.name)}"
-                        title="Student ID: ${escapeHTML(student.id)}">
-                        <i class="fa-solid fa-ellipsis"></i>
-                    </button>
-                </td>
-            </tr>
-        `;
+    function formatMinutes(minutes) {
+        const value = Number(minutes) || 0;
+        const hours = Math.floor(value / 60);
+        const remainingMinutes = value % 60;
+        return hours ? `${hours}h ${remainingMinutes}m` : `${remainingMinutes}m`;
     }
 
-    function renderStudents(students) {
-        cachedStudents = Array.isArray(students) ? students : [];
-
-        const tableBody = document.getElementById("studentsTableBody");
-        if (tableBody) {
-            if (cachedStudents.length === 0) {
-                tableBody.innerHTML = `
-                    <tr><td colspan="5">No students found. Add your first student.</td></tr>
-                `;
-            } else {
-                tableBody.innerHTML = cachedStudents
-                    .map((student, index) => studentRow(student, index))
-                    .join("");
-            }
-        }
-
-        const totalCount = document.getElementById("totalStudentsCount");
-        if (totalCount) {
-            totalCount.textContent = cachedStudents.length.toLocaleString();
-        }
-
-        const studentsCount = document.getElementById("studentsPageCount");
-        if (studentsCount) {
-            studentsCount.textContent = `${cachedStudents.length} student${cachedStudents.length === 1 ? "" : "s"}`;
-        }
-    }
-
-    async function loadStudents() {
-        const tableBody = document.getElementById("studentsTableBody");
-        if (tableBody) {
-            tableBody.innerHTML = '<tr><td colspan="5">Loading students...</td></tr>';
-        }
-
-        try {
-            const response = await fetch(API_URL);
-            const result = await response.json();
-
-            if (!response.ok || result.success === false) {
-                throw new Error(result.message || "Could not load students.");
-            }
-
-            renderStudents(result.data || []);
-        } catch (error) {
-            console.error("Unable to load students:", error);
-            if (tableBody) {
-                tableBody.innerHTML = `
-                    <tr><td colspan="5">Could not load students. Check that the backend is running.</td></tr>
-                `;
-            }
-        }
-    }
-
-    function updateGreeting() {
-        const heading = pageContent.querySelector(
-            ".welcome-section h2"
-        );
-
-        if (!heading) return;
-
+    function greeting() {
         const hour = new Date().getHours();
+        if (hour < 12) return "Good morning";
+        if (hour < 17) return "Good afternoon";
+        return "Good evening";
+    }
 
-        let greeting = "Welcome back";
-
-        if (hour < 12) {
-            greeting = "Good morning";
-        } else if (hour < 17) {
-            greeting = "Good afternoon";
-        } else {
-            greeting = "Good evening";
+    function showNotice(message, type = "success") {
+        let notice = document.getElementById("app-notice");
+        if (!notice) {
+            notice = document.createElement("div");
+            notice.id = "app-notice";
+            document.body.appendChild(notice);
         }
-
-        heading.textContent = `${greeting}, Admin! 👋`;
+        notice.className = `app-notice ${type}`;
+        notice.textContent = message;
+        clearTimeout(showNotice.timeout);
+        showNotice.timeout = setTimeout(() => notice.remove(), 4200);
     }
 
-    function studentsPageMarkup() {
-        return `
-            <section class="welcome-section page-heading">
-                <div>
-                    <h2><i class="fa-solid fa-users"></i> Students</h2>
-                    <p>Manage student records and profiles.</p>
-                </div>
-                <button class="primary-button" id="addStudentButton" type="button">
-                    <i class="fa-solid fa-plus"></i> Add Student
-                </button>
-            </section>
-
-            <section class="content-card">
-                <div class="section-header">
-                    <div>
-                        <h2>All Students</h2>
-                        <p id="studentsPageCount">Loading students...</p>
-                    </div>
-                </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>STUDENT</th>
-                                <th>STUDENT ID</th>
-                                <th>COURSE</th>
-                                <th>STATUS</th>
-                                <th>ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentsTableBody">
-                            <tr><td colspan="5">Loading students...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        `;
-    }
-
-    function showPage(page) {
-        navLinks.forEach(link => {
-            link.classList.toggle("active", link.dataset.page === page);
+    async function api(path, options = {}) {
+        const response = await fetch(`${API_BASE}${path}`, {
+            headers: {
+                ...(options.body ? { "Content-Type": "application/json" } : {}),
+                ...options.headers
+            },
+            ...options
         });
+        const contentType = response.headers.get("content-type") || "";
+        const payload = contentType.includes("application/json")
+            ? await response.json()
+            : null;
 
-        const topbarHeading = document.querySelector(".topbar h1");
-        const breadcrumb = document.querySelector(".breadcrumb");
-
-        if (topbarHeading) topbarHeading.textContent = page.charAt(0).toUpperCase() + page.slice(1);
-        if (breadcrumb) breadcrumb.textContent = `Pages / ${page.charAt(0).toUpperCase() + page.slice(1)}`;
-
-        if (page === "dashboard") {
-            location.reload(); // Simple reload restores dashboard template or re-renders base HTML
-            return;
+        if (!response.ok || !payload?.success) {
+            throw new Error(payload?.message || "The request could not be completed.");
         }
-
-        if (page === "tasks") {
-            renderTasksPage();
-        } else if (page === "focus zone") {
-            renderPomodoroPage();
-        } else if (page === "attendance") {
-            renderAttendancePage();
-        } else if (page === "notes") {
-            renderNotesPage();
-        } else if (page === "analytics") {
-            renderAnalyticsPage();
-        }
+        return payload;
     }
 
-    // View Renders
-   function renderFocusPage() { // <-- function rename kar dein
-    pageContent.innerHTML = `
-        <section class="content-card pomodoro-box">
-            <h2>Focus Zone</h2>
-            <p style="font-size:12px; color:var(--muted);">Stay focused for 25 minutes, then take a short break.</p>
-            <div class="timer-display" id="timer-text">25:00</div>
-            <div class="timer-controls">
-                <button id="start-timer-btn" class="primary-button"><i class="fa-solid fa-play"></i> Start Session</button>
-                <button id="reset-timer-btn" class="secondary-button"><i class="fa-solid fa-rotate-left"></i> Reset</button>
-            </div>
-        </section>
-        }
-                
-                <form id="add-task-form" style="margin-bottom: 24px;">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Task Title</label>
-                            <input type="text" id="task-title-input" class="form-control" placeholder="Assignment name" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Subject</label>
-                            <input type="text" id="task-subject-input" class="form-control" placeholder="e.g. CS201" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Due Date</label>
-                            <input type="date" id="task-date-input" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Priority</label>
-                            <select id="task-priority-input" class="form-control">
-                                <option value="High">High</option>
-                                <option value="Medium" selected>Medium</option>
-                                <option value="Low">Low</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button type="submit" class="primary-button"><i class="fa-solid fa-plus"></i> Add Task</button>
-                </form>
-
-                <div class="task-list">
-                    ${tasks.map(t => `
-                        <div class="task-item">
-                            <div class="task-left">
-                                <input type="checkbox" onchange="window.toggleTaskStatus(${t.id})" ${t.completed ? 'checked' : ''}>
-                                <div>
-                                    <p class="task-title ${t.completed ? 'completed' : ''}">${t.title}</p>
-                                    <span class="task-meta">${t.subject} • Due: ${t.dueDate}</span>
-                                </div>
-                            </div>
-                            <div style="display:flex; gap:10px; align-items:center;">
-                                <span class="badge ${t.priority.toLowerCase()}">${t.priority}</span>
-                                <button onclick="window.deleteTask(${t.id})" style="background:none; border:none; color:var(--red);"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        </div>
-                    `).join("")}
-                </div>
-            </section>
-        `;
-
-        document.getElementById("add-task-form").addEventListener("submit", (e) => {
-            e.preventDefault();
-            const newTask = {
-                id: Date.now(),
-                title: document.getElementById("task-title-input").value,
-                subject: document.getElementById("task-subject-input").value,
-                dueDate: document.getElementById("task-date-input").value,
-                priority: document.getElementById("task-priority-input").value,
-                completed: false
-            };
-            tasks.push(newTask);
-            saveTasks();
-            renderTasksPage();
-            refreshStats();
-        });
+    function currentPage() {
+        const page = decodeURIComponent(window.location.hash.slice(1) || "dashboard");
+        return Object.hasOwn(pageTitles, page) ? page : "dashboard";
     }
 
-    function renderPomodoroPage() {
+    function updateChrome(page) {
+        const title = pageTitles[page];
+        document.title = `${title} · StudySphere`;
+        document.querySelector(".topbar h1").textContent = title;
+        document.querySelector(".breadcrumb").textContent = `Pages / ${title}`;
+        navLinks.forEach(link => link.classList.toggle("active", link.dataset.page === page));
+    }
+
+    function renderError(error) {
         pageContent.innerHTML = `
-            <section class="content-card focus zone-box">
-                <h2>Focus Timer</h2>
-                <p style="font-size:12px; color:var(--muted);">Stay focused for 25 minutes, then take a 5-minute break.</p>
-                <div class="timer-display" id="timer-text">25:00</div>
-                <div class="timer-controls">
-                    <button id="start-timer-btn" class="primary-button"><i class="fa-solid fa-play"></i> Start Session</button>
-                    <button id="reset-timer-btn" class="secondary-button"><i class="fa-solid fa-rotate-left"></i> Reset</button>
-                </div>
+            <section class="content-card empty-state">
+                <i class="fa-solid fa-triangle-exclamation empty-state-icon"></i>
+                <h2>Could not load this page</h2>
+                <p>${escapeHTML(error.message || "Please check that the server is running.")}</p>
+                <button class="primary-button" type="button" id="retry-page-button"><i class="fa-solid fa-rotate-right"></i> Try again</button>
             </section>
         `;
+        document.getElementById("retry-page-button")?.addEventListener("click", () => renderPage(currentPage()));
+    }
 
-        const timerText = document.getElementById("timer-text");
-        const startBtn = document.getElementById("start-timer-btn");
-        const resetBtn = document.getElementById("reset-timer-btn");
+    function taskItem(task, { compact = false } = {}) {
+        const priority = String(task.priority || "Medium").toLowerCase();
+        const completed = Boolean(task.completed);
+        const id = Number(task.id);
+        return `
+            <article class="task-item ${completed ? "is-complete" : ""}">
+                <div class="task-left">
+                    <input type="checkbox" class="task-toggle" data-id="${id}" ${completed ? "checked" : ""} aria-label="Mark ${escapeHTML(task.title)} as complete">
+                    <div>
+                        <p class="task-title ${completed ? "completed" : ""}">${escapeHTML(task.title)}</p>
+                        <span class="task-meta">${escapeHTML(task.subject)} · Due ${escapeHTML(formatDate(task.dueDate))}</span>
+                    </div>
+                </div>
+                <div class="task-actions">
+                    <span class="badge ${priority}">${escapeHTML(task.priority)}</span>
+                    ${compact ? "" : `<button class="icon-text-button delete-task" data-id="${id}" type="button" aria-label="Delete ${escapeHTML(task.title)}"><i class="fa-solid fa-trash"></i></button>`}
+                </div>
+            </article>
+        `;
+    }
 
-        const updateTimerDisplay = () => {
-            const mins = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-            const secs = (timeLeft % 60).toString().padStart(2, '0');
-            timerText.textContent = `${mins}:${secs}`;
+    function bindTaskActions(container, refresh) {
+        container.querySelectorAll(".task-toggle").forEach(input => {
+            input.addEventListener("change", async event => {
+                const control = event.currentTarget;
+                control.disabled = true;
+                try {
+                    await api(`/tasks/${control.dataset.id}`, {
+                        method: "PATCH",
+                        body: JSON.stringify({ completed: control.checked })
+                    });
+                    await refresh();
+                } catch (error) {
+                    control.checked = !control.checked;
+                    control.disabled = false;
+                    showNotice(error.message, "error");
+                }
+            });
+        });
+
+        container.querySelectorAll(".delete-task").forEach(button => {
+            button.addEventListener("click", async event => {
+                const taskId = event.currentTarget.dataset.id;
+                if (!window.confirm("Delete this task?")) return;
+                try {
+                    await api(`/tasks/${taskId}`, { method: "DELETE" });
+                    showNotice("Task deleted.");
+                    await refresh();
+                } catch (error) {
+                    showNotice(error.message, "error");
+                }
+            });
+        });
+    }
+
+    function dashboardMarkup() {
+        return `
+            <section class="welcome-section">
+                <div><h2>${greeting()}! 👋</h2><p>Stay organized, protect your focus, and keep moving forward.</p></div>
+                <a href="#tasks" class="primary-button"><i class="fa-solid fa-plus"></i> Add new task</a>
+            </section>
+            <section class="stats-grid">
+                <article class="stat-card"><div class="stat-top"><span>Pending Tasks</span><div class="stat-icon purple"><i class="fa-solid fa-clock"></i></div></div><h2 id="stat-pending-count">–</h2><p class="stat-description">Assignments to complete</p></article>
+                <article class="stat-card"><div class="stat-top"><span>Total Notes</span><div class="stat-icon blue"><i class="fa-solid fa-file-lines"></i></div></div><h2 id="stat-notes-count">–</h2><p class="stat-description">Saved quick notes</p></article>
+                <article class="stat-card"><div class="stat-top"><span>Attendance Avg</span><div class="stat-icon green"><i class="fa-solid fa-chart-simple"></i></div></div><h2 id="stat-attendance-avg">–</h2><p class="stat-description">Across tracked subjects</p></article>
+                <article class="stat-card"><div class="stat-top"><span>Focus Time</span><div class="stat-icon orange"><i class="fa-solid fa-fire"></i></div></div><h2 id="stat-focus-time">–</h2><p class="stat-description">Recorded today</p></article>
+            </section>
+            <section class="content-card">
+                <div class="section-header"><div><h2>Upcoming assignments</h2><p>Your next unfinished tasks.</p></div><a href="#tasks" class="secondary-button">Manage all <i class="fa-solid fa-arrow-right"></i></a></div>
+                <div id="dashboard-task-list" class="task-list-container"></div>
+            </section>
+        `;
+    }
+
+    async function renderDashboard() {
+        pageContent.innerHTML = dashboardMarkup();
+        try {
+            const { data } = await api("/dashboard");
+            document.getElementById("stat-pending-count").textContent = data.pendingTasks;
+            document.getElementById("stat-notes-count").textContent = data.totalNotes;
+            document.getElementById("stat-attendance-avg").textContent = `${Math.round(data.attendanceAverage)}%`;
+            document.getElementById("stat-focus-time").textContent = formatMinutes(data.focusMinutesToday);
+            const list = document.getElementById("dashboard-task-list");
+            list.innerHTML = data.upcomingTasks.length
+                ? data.upcomingTasks.map(task => taskItem(task, { compact: true })).join("")
+                : `<div class="empty-inline"><i class="fa-solid fa-circle-check"></i> No pending tasks. Enjoy your break!</div>`;
+            bindTaskActions(list, renderDashboard);
+        } catch (error) {
+            renderError(error);
+        }
+    }
+
+    function tasksMarkup() {
+        return `
+            <section class="welcome-section page-heading"><div><h2>Assignments & tasks</h2><p>Plan work, set priorities, and tick things off.</p></div></section>
+            <section class="content-card">
+                <div class="section-header"><div><h2>Add a task</h2><p>Everything starts with a clear next step.</p></div></div>
+                <form id="task-form"><div class="form-grid">
+                    <label class="form-group">Task title<input class="form-control" name="title" maxlength="200" required placeholder="e.g. Finish database assignment"></label>
+                    <label class="form-group">Subject<input class="form-control" name="subject" maxlength="100" required placeholder="e.g. CS201"></label>
+                    <label class="form-group">Due date<input class="form-control" name="dueDate" type="date" value="${today()}" required></label>
+                    <label class="form-group">Priority<select class="form-control" name="priority"><option>High</option><option selected>Medium</option><option>Low</option></select></label>
+                </div><button class="primary-button" type="submit"><i class="fa-solid fa-plus"></i> Add task</button></form>
+            </section>
+            <section class="content-card"><div class="section-header"><div><h2>Your tasks</h2><p id="task-count">Loading tasks…</p></div></div><div id="tasks-list" class="task-list-container"></div></section>
+        `;
+    }
+
+    async function loadTasks() {
+        const list = document.getElementById("tasks-list");
+        const count = document.getElementById("task-count");
+        if (!list || !count) return;
+        list.innerHTML = `<div class="loading-inline">Loading tasks…</div>`;
+        try {
+            const result = await api("/tasks?limit=100");
+            count.textContent = `${result.total} task${result.total === 1 ? "" : "s"}`;
+            list.innerHTML = result.data.length
+                ? result.data.map(task => taskItem(task)).join("")
+                : `<div class="empty-inline"><i class="fa-solid fa-list-check"></i> Add your first task above.</div>`;
+            bindTaskActions(list, loadTasks);
+        } catch (error) {
+            list.innerHTML = `<p class="inline-error">${escapeHTML(error.message)}</p>`;
+        }
+    }
+
+    async function renderTasks() {
+        pageContent.innerHTML = tasksMarkup();
+        const form = document.getElementById("task-form");
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+            const button = form.querySelector("button[type=submit]");
+            const values = new FormData(form);
+            button.disabled = true;
+            try {
+                await api("/tasks", { method: "POST", body: JSON.stringify({
+                    title: values.get("title"), subject: values.get("subject"),
+                    dueDate: values.get("dueDate"), priority: values.get("priority"), completed: false
+                }) });
+                form.reset();
+                form.elements.dueDate.value = today();
+                showNotice("Task added.");
+                await loadTasks();
+            } catch (error) {
+                showNotice(error.message, "error");
+            } finally {
+                button.disabled = false;
+            }
+        });
+        await loadTasks();
+    }
+
+    function attendanceMarkup() {
+        return `
+            <section class="welcome-section page-heading"><div><h2>Attendance tracker</h2><p>Keep an eye on your attendance across every subject.</p></div></section>
+            <section class="content-card"><div class="section-header"><div><h2>Add a subject</h2><p>Enter classes attended and total classes.</p></div></div>
+                <form id="attendance-form"><div class="form-grid">
+                    <label class="form-group">Subject<input class="form-control" name="subject" maxlength="100" required placeholder="e.g. Computer Networks"></label>
+                    <label class="form-group">Classes attended<input class="form-control" name="attended" type="number" min="0" step="1" required placeholder="18"></label>
+                    <label class="form-group">Total classes<input class="form-control" name="total" type="number" min="1" step="1" required placeholder="20"></label>
+                </div><button class="primary-button" type="submit"><i class="fa-solid fa-plus"></i> Save attendance</button></form>
+            </section>
+            <section class="content-card"><div class="section-header"><div><h2>Tracked subjects</h2><p id="attendance-count">Loading…</p></div></div><div id="attendance-list" class="record-grid"></div></section>
+        `;
+    }
+
+    function attendanceCard(record) {
+        const percentage = Math.round((record.attended / record.total) * 100);
+        return `
+            <article class="record-card">
+                <div class="record-card-header"><h3>${escapeHTML(record.subject)}</h3><button class="icon-text-button delete-attendance" data-id="${Number(record.id)}" aria-label="Delete ${escapeHTML(record.subject)}"><i class="fa-solid fa-trash"></i></button></div>
+                <strong>${percentage}%</strong><span>${record.attended} of ${record.total} classes attended</span>
+                <div class="progress-track"><div class="progress-fill ${percentage < 75 ? "warning" : ""}" style="width:${Math.max(0, Math.min(100, percentage))}%"></div></div>
+            </article>
+        `;
+    }
+
+    async function loadAttendance() {
+        const list = document.getElementById("attendance-list");
+        const count = document.getElementById("attendance-count");
+        if (!list || !count) return;
+        try {
+            const result = await api("/attendance?limit=100");
+            count.textContent = `${result.total} subject${result.total === 1 ? "" : "s"} tracked`;
+            list.innerHTML = result.data.length
+                ? result.data.map(attendanceCard).join("")
+                : `<div class="empty-inline"><i class="fa-solid fa-chart-simple"></i> Add a subject to start tracking attendance.</div>`;
+            list.querySelectorAll(".delete-attendance").forEach(button => button.addEventListener("click", async event => {
+                if (!window.confirm("Delete this attendance record?")) return;
+                try {
+                    await api(`/attendance/${event.currentTarget.dataset.id}`, { method: "DELETE" });
+                    showNotice("Attendance record deleted.");
+                    await loadAttendance();
+                } catch (error) { showNotice(error.message, "error"); }
+            }));
+        } catch (error) {
+            list.innerHTML = `<p class="inline-error">${escapeHTML(error.message)}</p>`;
+        }
+    }
+
+    async function renderAttendance() {
+        pageContent.innerHTML = attendanceMarkup();
+        const form = document.getElementById("attendance-form");
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+            const button = form.querySelector("button[type=submit]");
+            const values = new FormData(form);
+            button.disabled = true;
+            try {
+                await api("/attendance", { method: "POST", body: JSON.stringify({
+                    subject: values.get("subject"), attended: Number(values.get("attended")), total: Number(values.get("total"))
+                }) });
+                form.reset();
+                showNotice("Attendance saved.");
+                await loadAttendance();
+            } catch (error) {
+                showNotice(error.message, "error");
+            } finally {
+                button.disabled = false;
+            }
+        });
+        await loadAttendance();
+    }
+
+    function notesMarkup() {
+        return `
+            <section class="welcome-section page-heading"><div><h2>Quick notes</h2><p>Capture ideas, concepts, and revision reminders in one place.</p></div></section>
+            <section class="content-card"><div class="section-header"><div><h2>New note</h2><p>Notes are saved to your StudySphere workspace.</p></div></div>
+                <form id="note-form"><div class="form-grid note-form-grid">
+                    <label class="form-group">Title<input class="form-control" name="title" maxlength="200" required placeholder="e.g. OS deadlock conditions"></label>
+                    <label class="form-group">Date<input class="form-control" name="date" type="date" value="${today()}" required></label>
+                </div><label class="form-group">Note<textarea class="form-control note-textarea" name="content" maxlength="10000" required placeholder="Write your note here…"></textarea></label>
+                <button class="primary-button" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save note</button></form>
+            </section>
+            <section class="content-card"><div class="section-header"><div><h2>Saved notes</h2><p id="note-count">Loading…</p></div></div><div id="notes-list" class="note-grid"></div></section>
+        `;
+    }
+
+    function noteCard(note) {
+        return `
+            <article class="note-card">
+                <div class="record-card-header"><div><h3>${escapeHTML(note.title)}</h3><span class="task-meta">${escapeHTML(formatDate(note.date))}</span></div><button class="icon-text-button delete-note" data-id="${Number(note.id)}" aria-label="Delete ${escapeHTML(note.title)}"><i class="fa-solid fa-trash"></i></button></div>
+                <p>${escapeHTML(note.content)}</p>
+            </article>
+        `;
+    }
+
+    async function loadNotes() {
+        const list = document.getElementById("notes-list");
+        const count = document.getElementById("note-count");
+        if (!list || !count) return;
+        try {
+            const result = await api("/notes?limit=100");
+            count.textContent = `${result.total} note${result.total === 1 ? "" : "s"}`;
+            list.innerHTML = result.data.length
+                ? result.data.map(noteCard).join("")
+                : `<div class="empty-inline"><i class="fa-solid fa-note-sticky"></i> Save your first note above.</div>`;
+            list.querySelectorAll(".delete-note").forEach(button => button.addEventListener("click", async event => {
+                if (!window.confirm("Delete this note?")) return;
+                try {
+                    await api(`/notes/${event.currentTarget.dataset.id}`, { method: "DELETE" });
+                    showNotice("Note deleted.");
+                    await loadNotes();
+                } catch (error) { showNotice(error.message, "error"); }
+            }));
+        } catch (error) {
+            list.innerHTML = `<p class="inline-error">${escapeHTML(error.message)}</p>`;
+        }
+    }
+
+    async function renderNotes() {
+        pageContent.innerHTML = notesMarkup();
+        const form = document.getElementById("note-form");
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+            const button = form.querySelector("button[type=submit]");
+            const values = new FormData(form);
+            button.disabled = true;
+            try {
+                await api("/notes", { method: "POST", body: JSON.stringify({
+                    title: values.get("title"), content: values.get("content"), date: values.get("date")
+                }) });
+                form.reset();
+                form.elements.date.value = today();
+                showNotice("Note saved.");
+                await loadNotes();
+            } catch (error) {
+                showNotice(error.message, "error");
+            } finally {
+                button.disabled = false;
+            }
+        });
+        await loadNotes();
+    }
+
+    function updateTimerDisplay() {
+        const timer = document.getElementById("focus-timer");
+        if (!timer) return;
+        const minutes = Math.floor(focusState.secondsRemaining / 60).toString().padStart(2, "0");
+        const seconds = (focusState.secondsRemaining % 60).toString().padStart(2, "0");
+        timer.textContent = `${minutes}:${seconds}`;
+    }
+
+    function stopFocusTimer() {
+        clearInterval(focusState.interval);
+        focusState.interval = null;
+        focusState.running = false;
+    }
+
+    async function recordFocusSession(duration) {
+        await api("/focus-sessions", {
+            method: "POST",
+            body: JSON.stringify({ durationMinutes: duration })
+        });
+    }
+
+    function focusMarkup() {
+        return `
+            <section class="welcome-section page-heading"><div><h2>Focus zone</h2><p>Start a distraction-free session and record the time you invest in studying.</p></div></section>
+            <section class="content-card pomodoro-box">
+                <label class="form-group focus-duration-control">Session length (minutes)<input class="form-control" id="focus-duration" type="number" min="1" max="1440" value="${focusState.duration}"></label>
+                <div class="timer-display" id="focus-timer">25:00</div>
+                <div class="timer-controls"><button class="primary-button" id="focus-start" type="button"><i class="fa-solid fa-play"></i> Start session</button><button class="secondary-button" id="focus-reset" type="button"><i class="fa-solid fa-rotate-left"></i> Reset</button><button class="secondary-button" id="focus-record" type="button"><i class="fa-solid fa-check"></i> Record now</button></div>
+                <p class="timer-help">A completed timer is recorded automatically. “Record now” logs the selected session length.</p>
+            </section>
+        `;
+    }
+
+    async function renderFocus() {
+        pageContent.innerHTML = focusMarkup();
+        const durationInput = document.getElementById("focus-duration");
+        const startButton = document.getElementById("focus-start");
+        const resetButton = document.getElementById("focus-reset");
+        const recordButton = document.getElementById("focus-record");
+        updateTimerDisplay();
+
+        const setDuration = () => {
+            const duration = Number(durationInput.value);
+            if (!Number.isInteger(duration) || duration < 1 || duration > 1440) {
+                throw new Error("Enter a session length between 1 and 1440 minutes.");
+            }
+            focusState.duration = duration;
+            return duration;
         };
 
-        startBtn.addEventListener("click", () => {
-            if (isTimerRunning) {
-                clearInterval(timerInterval);
-                isTimerRunning = false;
-                startBtn.innerHTML = `<i class="fa-solid fa-play"></i> Resume`;
-            } else {
-                isTimerRunning = true;
-                startBtn.innerHTML = `<i class="fa-solid fa-pause"></i> Pause`;
-                timerInterval = setInterval(() => {
-                    if (timeLeft > 0) {
-                        timeLeft--;
-                        updateTimerDisplay();
-                    } else {
-                        clearInterval(timerInterval);
-                        alert("Focus session finished! Take a break.");
-                        timeLeft = 25 * 60;
-                        updateTimerDisplay();
-                    }
+        startButton.addEventListener("click", () => {
+            try {
+                const duration = setDuration();
+                if (focusState.secondsRemaining > duration * 60 || focusState.secondsRemaining === 0) {
+                    focusState.secondsRemaining = duration * 60;
+                }
+                if (focusState.running) {
+                    stopFocusTimer();
+                    startButton.innerHTML = `<i class="fa-solid fa-play"></i> Resume session`;
+                    return;
+                }
+                focusState.running = true;
+                startButton.innerHTML = `<i class="fa-solid fa-pause"></i> Pause session`;
+                focusState.interval = setInterval(async () => {
+                    focusState.secondsRemaining -= 1;
+                    updateTimerDisplay();
+                    if (focusState.secondsRemaining > 0) return;
+                    stopFocusTimer();
+                    try {
+                        await recordFocusSession(focusState.duration);
+                        showNotice("Focus session recorded. Great work!");
+                    } catch (error) { showNotice(error.message, "error"); }
+                    focusState.secondsRemaining = focusState.duration * 60;
+                    updateTimerDisplay();
+                    startButton.innerHTML = `<i class="fa-solid fa-play"></i> Start session`;
                 }, 1000);
-            }
+            } catch (error) { showNotice(error.message, "error"); }
         });
 
-        resetBtn.addEventListener("click", () => {
-            clearInterval(timerInterval);
-            isTimerRunning = false;
-            timeLeft = 25 * 60;
-            updateTimerDisplay();
-            startBtn.innerHTML = `<i class="fa-solid fa-play"></i> Start Session`;
+        resetButton.addEventListener("click", () => {
+            try {
+                stopFocusTimer();
+                focusState.secondsRemaining = setDuration() * 60;
+                startButton.innerHTML = `<i class="fa-solid fa-play"></i> Start session`;
+                updateTimerDisplay();
+            } catch (error) { showNotice(error.message, "error"); }
         });
-    }
 
-    function renderAttendancePage() {
-        pageContent.innerHTML = `
-            <section class="content-card">
-                <h2>Attendance & CGPA Tracker</h2>
-                <div style="margin-top:20px; display:grid; gap:16px;">
-                    ${attendanceData.map(a => {
-                        const pct = Math.round((a.attended / a.total) * 100);
-                        return `
-                            <div class="task-item">
-                                <div>
-                                    <p class="task-title">${a.subject}</p>
-                                    <span class="task-meta">Attended ${a.attended} /${a.total} lectures</span>
-                                </div>
-                                <span class="badge ${pct >= 75 ? 'low' : 'high'}">${pct}% Attendance</span>
-                            </div>
-                        `;
-                    }).join("")}
-                </div>
-            </section>
-        `;
-    }
-
-    function renderNotesPage() {
-        pageContent.innerHTML = `
-            <section class="content-card">
-                <h2>Quick Study Notes</h2>
-                <form id="note-form" style="margin:20px 0;">
-                    <div class="form-group" style="margin-bottom:12px;">
-                        <input type="text" id="note-title" class="form-control" placeholder="Note Title" required>
-                    </div>
-                    <div class="form-group" style="margin-bottom:12px;">
-                        <textarea id="note-content" class="form-control" rows="3" placeholder="Write key points..." required></textarea>
-                    </div>
-                    <button type="submit" class="primary-button">Save Note</button>
-                </form>
-
-                <div style="display:grid; gap:12px;">
-                    ${notes.map(n => `
-                        <div class="task-item" style="flex-direction:column; align-items:flex-start;">
-                            <p class="task-title">${n.title}</p>
-                            <span class="task-meta">${n.date}</span>
-                            <p style="font-size:12px; margin-top:8px; white-space:pre-line;">${n.content}</p>
-                        </div>
-                    `).join("")}
-                </div>
-            </section>
-        `;
-
-        document.getElementById("note-form").addEventListener("submit", (e) => {
-            e.preventDefault();
-            notes.push({
-                id: Date.now(),
-                title: document.getElementById("note-title").value,
-                content: document.getElementById("note-content").value,
-                date: new Date().toISOString().split('T')[0]
-            });
-            saveNotes();
-            renderNotesPage();
-            refreshStats();
+        recordButton.addEventListener("click", async () => {
+            try {
+                const duration = setDuration();
+                recordButton.disabled = true;
+                await recordFocusSession(duration);
+                showNotice(`${duration}-minute focus session recorded.`);
+            } catch (error) { showNotice(error.message, "error"); }
+            finally { recordButton.disabled = false; }
         });
     }
 
-    function renderAnalyticsPage() {
-        pageContent.innerHTML = `
-            <section class="content-card" style="text-align:center; padding:40px;">
-                <i class="fa-solid fa-chart-pie" style="font-size:48px; color:var(--primary); margin-bottom:16px;"></i>
-                <h2>Productivity Insights</h2>
-                <p style="color:var(--muted); font-size:13px; max-width:400px; margin:8px auto;">
-                    You have completed <b>${tasks.filter(t => t.completed).length}</b> assignment tasks and maintained an average attendance rate of <b>${document.getElementById("stat-attendance-avg")?.textContent || "0%"}</b>.
-                </p>
-            </section>
-        `;
+    async function renderAnalytics() {
+        pageContent.innerHTML = `<section class="content-card loading-state">Preparing your study overview…</section>`;
+        try {
+            const [dashboard, tasks, attendance] = await Promise.all([
+                api("/dashboard"), api("/tasks?limit=100"), api("/attendance?limit=100")
+            ]);
+            const completed = tasks.data.filter(task => task.completed).length;
+            const taskCompletion = tasks.total ? Math.round((completed / tasks.total) * 100) : 0;
+            const strongestSubject = attendance.data
+                .map(item => ({ ...item, percentage: Math.round((item.attended / item.total) * 100) }))
+                .sort((left, right) => right.percentage - left.percentage)[0];
+            pageContent.innerHTML = `
+                <section class="welcome-section page-heading"><div><h2>Analytics</h2><p>A concise view of your current study momentum.</p></div></section>
+                <section class="analytics-grid">
+                    <article class="content-card metric-card"><span>Task completion</span><strong>${taskCompletion}%</strong><p>${completed} of ${tasks.total} tasks completed</p></article>
+                    <article class="content-card metric-card"><span>Attendance average</span><strong>${Math.round(dashboard.data.attendanceAverage)}%</strong><p>Across ${attendance.total} tracked subjects</p></article>
+                    <article class="content-card metric-card"><span>Focus today</span><strong>${formatMinutes(dashboard.data.focusMinutesToday)}</strong><p>Time logged in focused sessions</p></article>
+                    <article class="content-card metric-card"><span>Strongest attendance</span><strong>${strongestSubject ? `${strongestSubject.percentage}%` : "–"}</strong><p>${escapeHTML(strongestSubject?.subject || "Add a subject to begin")}</p></article>
+                </section>
+                <section class="content-card"><div class="section-header"><div><h2>What to do next</h2><p>Use these signals to choose your next study block.</p></div></div>
+                    <ul class="insight-list">
+                        <li>${dashboard.data.pendingTasks ? `${dashboard.data.pendingTasks} task${dashboard.data.pendingTasks === 1 ? " is" : "s are"} still pending.` : "All current tasks are complete."}</li>
+                        <li>${dashboard.data.totalNotes} saved note${dashboard.data.totalNotes === 1 ? " is" : "s are"} ready for revision.</li>
+                        <li>${dashboard.data.attendanceAverage < 75 ? "Consider prioritizing classes with lower attendance." : "Your attendance is on track."}</li>
+                    </ul>
+                </section>
+            `;
+        } catch (error) { renderError(error); }
     }
 
-    // Navigation Click Listeners
-    navLinks.forEach(link => {
-        link.addEventListener("click", (e) => {
-            e.preventDefault();
-            const page = link.dataset.page;
-            history.replaceState(null, "", `#${page}`);
-            showPage(page);
-        });
+    async function renderPage(page) {
+        const selectedPage = Object.hasOwn(pageTitles, page) ? page : "dashboard";
+        updateChrome(selectedPage);
+        if (selectedPage === "dashboard") return renderDashboard();
+        if (selectedPage === "tasks") return renderTasks();
+        if (selectedPage === "focus-zone") return renderFocus();
+        if (selectedPage === "attendance") return renderAttendance();
+        if (selectedPage === "notes") return renderNotes();
+        return renderAnalytics();
+    }
+
+    function applyTheme() {
+        const isDark = localStorage.getItem("studysphere_theme") === "dark";
+        document.body.classList.toggle("dark-mode", isDark);
+        themeToggle.querySelector("i").className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
+    }
+
+    themeToggle.addEventListener("click", () => {
+        const isDark = !document.body.classList.contains("dark-mode");
+        localStorage.setItem("studysphere_theme", isDark ? "dark" : "light");
+        applyTheme();
     });
-
-    window.addEventListener("hashchange", () => {
-        const page = window.location.hash.slice(1) || "dashboard";
-        showPage(page);
-    });
-
-    // Init
-    refreshStats();
+    window.addEventListener("hashchange", () => renderPage(currentPage()));
+    applyTheme();
+    renderPage(currentPage());
 });
