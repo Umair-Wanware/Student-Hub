@@ -2,17 +2,143 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../database/db");
 
-// GET: Retrieve all students
+function validateStudentId(req, res, next){
+    const {id} = req.params;
+    if(!/^[1-9]\d*$/.test(id)){
+        return res.status(400).json({
+            success: false,
+            message: "Student ID must be positive integer"
+        });
+    }
+}
+
+// GET: Retrieve students with pagination, search, and filters
 router.get("/", async (req, res) => {
     try {
-        const result = await pool.query(
-            "SELECT * FROM students ORDER BY id ASC"
+        const { page = "1", limit = "10", search, course, year } = req.query;
+
+        // Validate pagination parameters
+        if (
+            typeof page !== "string" ||
+            !/^\d+$/.test(page) ||
+            Number(page) < 1
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Page must be a positive integer."
+            });
+        }
+
+        if (
+            typeof limit !== "string" ||
+            !/^\d+$/.test(limit) ||
+            Number(limit) < 1 ||
+            Number(limit) > 100
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Limit must be between 1 and 100."
+            });
+        }
+
+        const currentPage = Number(page);
+        const pageSize = Number(limit);
+        const offset = (currentPage - 1) * pageSize;
+
+        // Build parameterized filters
+        const conditions = [];
+        const params = [];
+
+        if (search !== undefined) {
+            if (typeof search !== "string") {
+                return res.status(400).json({
+                    success: false,
+                    message: "Search must be a string."
+                });
+            }
+
+            const term = search.trim();
+
+            if (term.length > 100) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Search cannot exceed 100 characters."
+                });
+            }
+
+            if (term) {
+                params.push(`%${term}%`);
+                const index = params.length;
+
+                conditions.push(
+                    `(name ILIKE $${index}
+                    OR email ILIKE $${index}
+                    OR course ILIKE $${index}
+                    OR CAST(id AS TEXT) ILIKE $${index})`
+                );
+            }
+        }
+
+        if (course !== undefined) {
+            if (typeof course !== "string" || !course.trim()) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Course must be a non-empty string."
+                });
+            }
+
+            params.push(`%${course.trim()}%`);
+            conditions.push(`course ILIKE $${params.length}`);
+        }
+
+        if (year !== undefined) {
+            if (
+                typeof year !== "string" ||
+                !/^[1-6]$/.test(year)
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Year must be an integer between 1 and 6."
+                });
+            }
+
+            params.push(Number(year));
+            conditions.push(`year = $${params.length}`);
+        }
+
+        const whereClause = conditions.length
+            ? `WHERE ${conditions.join(" AND ")}`
+            : "";
+
+        // Get total number of matching students
+        const countResult = await pool.query(
+            `SELECT COUNT(*)::int AS total
+             FROM students
+             ${whereClause}`,
+            params
+        );
+
+        const total = countResult.rows[0].total;
+
+        // Retrieve the requested page
+        const studentsResult = await pool.query(
+            `SELECT *
+             FROM students
+             ${whereClause}
+             ORDER BY id ASC
+             LIMIT $${params.length + 1}
+             OFFSET $${params.length + 2}`,
+            [...params, pageSize, offset]
         );
 
         res.status(200).json({
             success: true,
-            count: result.rows.length,
-            data: result.rows
+            count: studentsResult.rows.length,
+            total,
+            page: currentPage,
+            limit: pageSize,
+            totalPages: Math.ceil(total / pageSize),
+            data: studentsResult.rows
         });
     } catch (error) {
         console.error("Error fetching students:", error.message);
@@ -73,7 +199,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT: Update an existing student
-router.put("/:id", async (req, res) => {
+router.put("/:id", validateStudentId, async (req, res) => {
     const { id } = req.params;
     const { name, email, course, year } = req.body;
 
@@ -123,7 +249,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE: Remove a student
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", validateStudentId, async (req, res) => {
     const { id } = req.params;
 
     try {

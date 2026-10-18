@@ -3,6 +3,11 @@ const path = require("path");
 
 const app = express();
 
+const{
+    notFoundHandler,
+    errorHandler
+} = require("./middleware/errorHandler");
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -20,6 +25,7 @@ app.get("/api/health", (req, res) => {
 
 // Student routes
 const studentRoutes = require("./routes/studentRoutes");
+const { error } = require("console");
 
 app.use("/api/students", studentRoutes);
 
@@ -32,3 +38,5 @@ app.use("/api", (req, res) => {
 });
 
 module.exports = app;
+app.use(notFoundHandler);
+app.use(errorHandler);

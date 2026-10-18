@@ -92,20 +92,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderStudents(students) {
+        allStudents = Array.isArray(students) ? students : []
         cachedStudents = Array.isArray(students) ? students : [];
 
         const tableBody = document.getElementById("studentsTableBody");
+        const countElement = document.getElementById("studentsPageCount");
+
+        if (countElement) {
+            countElement.textContent =
+            `${cachedStudents.length} student${cachedStudents.length !== 1 ? "s" : ""} found`;
+        }
+
         if (tableBody) {
             if (cachedStudents.length === 0) {
                 tableBody.innerHTML = `
-                    <tr><td colspan="5">No students found. Add your first student.</td></tr>
-                `;
+                <tr>
+                    <td colspan="5">No students found. Add your first student.</td>
+                </tr>
+            `;
             } else {
                 tableBody.innerHTML = cachedStudents
-                    .map((student, index) => studentRow(student, index))
-                    .join("");
+                .map((student, index) => studentRow(student, index))
+                .join("");
             }
         }
+    }
 
         const totalCount = document.getElementById("totalStudentsCount");
         if (totalCount) {
@@ -170,10 +181,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <section class="content-card">
                 <div class="section-header">
-                    <div>
-                        <h2>All Students</h2>
-                        <p id="studentsPageCount">Loading students...</p>
-                    </div>
+                <div>
+                  <h2>All Students</h2>
+                   <p id="studentsPageCount">Loading students...</p>
+                </div>
+
+                <div class="student-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input
+                type="search"
+                id="studentSearchInput"
+                placeholder="Search by name, email, or student ID..."
+                aria-label="Search students">
+                </div>
                 </div>
                 <div class="table-container">
                     <table>
