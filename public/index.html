@@ -1,80 +1,72 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Student Management System</title>
-
+    <title>StudySphere - Student Productivity Hub</title>
     <link rel="stylesheet" href="css/style.css">
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-    >
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
-
 <body>
     <div class="app-container">
 
         <!-- Sidebar -->
         <aside class="sidebar">
-
             <div class="brand">
                 <div class="brand-icon">
                     <i class="fa-solid fa-graduation-cap"></i>
                 </div>
-
                 <div>
-                    <h2>EduManage</h2>
-                    <p>Student Portal</p>
+                    <h2>StudySphere</h2>
+                    <p>Productivity Hub</p>
                 </div>
             </div>
 
             <!-- Navigation -->
             <div class="nav-section">
-                <p class="nav-label">MAIN MENU</p>
+                <p class="nav-label">STUDY TOOLS</p>
 
                 <a href="#dashboard" class="nav-link active" data-page="dashboard">
                     <i class="fa-solid fa-chart-pie"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <a href="#students" class="nav-link" data-page="students">
-                    <i class="fa-solid fa-users"></i>
-                    <span>Students</span>
+                <a href="#tasks" class="nav-link" data-page="tasks">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Assignments & Tasks</span>
                 </a>
 
-                <a href="#courses" class="nav-link" data-page="courses">
-                    <i class="fa-solid fa-book-open"></i>
-                    <span>Courses</span>
+                <a href="#focus flow" class="nav-link" data-page="focus flow">
+                    <i class="fa-solid fa-stopwatch"></i>
+                    <span>Focus flow Timer</span>
                 </a>
 
                 <a href="#attendance" class="nav-link" data-page="attendance">
-                    <i class="fa-solid fa-calendar-check"></i>
-                    <span>Attendance</span>
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>Attendance & CGPA</span>
                 </a>
 
-                <a href="#examinations" class="nav-link" data-page="examinations">
-                    <i class="fa-solid fa-graduation-cap"></i>
-                    <span>Examinations</span>
+                <a href="#notes" class="nav-link" data-page="notes">
+                    <i class="fa-solid fa-note-sticky"></i>
+                    <span>Quick Notes</span>
+                </a>
+
+                <a href="#analytics" class="nav-link" data-page="analytics">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Analytics</span>
                 </a>
             </div>
 
-            <!-- Admin Profile -->
+            <!-- Profile Summary Bottom -->
             <div class="sidebar-bottom">
                 <div class="admin-profile">
-                    <div class="avatar">A</div>
-
+                    <div class="avatar">CS</div>
                     <div class="admin-info">
-                        <h4>Administrator</h4>
-                        <p>Admin Account</p>
+                        <h4>Computer Science</h4>
+                        <p>Student Account</p>
                     </div>
-
-                    <i class="fa-solid fa-ellipsis"></i>
                 </div>
             </div>
-
         </aside>
 
         <!-- Main Content -->
@@ -88,17 +80,15 @@
                 </div>
 
                 <div class="topbar-actions">
-                    <button class="icon-button" aria-label="Notifications">
-                        <i class="fa-regular fa-bell"></i>
-                        <span class="notification-dot"></span>
+                    <button class="icon-button" id="theme-toggle" aria-label="Toggle Theme">
+                        <i class="fa-solid fa-moon"></i>
                     </button>
 
                     <div class="profile-summary">
-                        <div class="avatar">A</div>
-
+                        <div class="avatar">CS</div>
                         <div>
-                            <h4>Admin User</h4>
-                            <p>Administrator</p>
+                            <h4>CS Student</h4>
+                            <p>B.Sc. Computer Science</p>
                         </div>
                     </div>
                 </div>
@@ -110,30 +100,27 @@
                 <!-- Welcome Section -->
                 <section class="welcome-section">
                     <div>
-                        <h2>Welcome back, Admin! 👋</h2>
-                        <p>
-                            Here's what's happening at your institution today.
-                        </p>
+                        <h2>Good day! 👋</h2>
+                        <p>Study Smarter. Stay Organized. Achieve More.</p>
                     </div>
 
-                    <button class="primary-button" id="addStudentButton" type="button">
+                    <button class="primary-button">
                         <i class="fa-solid fa-plus"></i>
                         Add Student
                     </button>
                 </section>
 
-                <!-- Statistics -->
+                <!-- Statistics Grid -->
                 <section class="stats-grid">
-
                     <article class="stat-card">
                         <div class="stat-top">
-                            <span>Total Students</span>
+                            <span>Pending Tasks</span>
                             <div class="stat-icon purple">
-                                <i class="fa-solid fa-users"></i>
+                                <i class="fa-solid fa-clock"></i>
                             </div>
                         </div>
 
-                        <h2 id="totalStudentsCount">--</h2>
+                        <h2>2,450</h2>
 
                         <p class="stat-description">
                             <span class="positive">+12.5%</span>
@@ -143,66 +130,48 @@
 
                     <article class="stat-card">
                         <div class="stat-top">
-                            <span>Active Courses</span>
+                            <span>Total Notes</span>
                             <div class="stat-icon blue">
-                                <i class="fa-solid fa-book-open"></i>
-                            </div>
-                        </div>
-
-                        <h2>32</h2>
-
-                        <p class="stat-description">
-                            <span class="positive">+4.2%</span>
-                            compared to last month
-                        </p>
-                    </article>
-
-                    <article class="stat-card">
-                        <div class="stat-top">
-                            <span>Average Attendance</span>
-                            <div class="stat-icon green">
-                                <i class="fa-solid fa-calendar-check"></i>
-                            </div>
-                        </div>
-
-                        <h2>87.6%</h2>
-
-                        <p class="stat-description">
-                            <span class="positive">+2.8%</span>
-                            compared to last month
-                        </p>
-                    </article>
-
-                    <article class="stat-card">
-                        <div class="stat-top">
-                            <span>Pending Results</span>
-                            <div class="stat-icon orange">
                                 <i class="fa-solid fa-file-lines"></i>
                             </div>
                         </div>
-
-                        <h2>18</h2>
-
-                        <p class="stat-description">
-                            Examinations awaiting results
-                        </p>
+                        <h2 id="stat-notes-count">0</h2>
+                        <p class="stat-description">Saved quick notes</p>
                     </article>
 
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <span>Attendance Avg</span>
+                            <div class="stat-icon green">
+                                <i class="fa-solid fa-chart-simple"></i>
+                            </div>
+                        </div>
+                        <h2 id="stat-attendance-avg">0%</h2>
+                        <p class="stat-description"><span class="positive">Tracked</span> subjects</p>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <span>Focus Time</span>
+                            <div class="stat-icon orange">
+                                <i class="fa-solid fa-fire"></i>
+                            </div>
+                        </div>
+                        <h2 id="stat-focus-time">25m</h2>
+                        <p class="stat-description">Today's target</p>
+                    </article>
                 </section>
 
-                <!-- Recent Students -->
+                <!-- Recent Tasks Widget -->
                 <section class="content-card">
-
                     <div class="section-header">
                         <div>
-                            <h2>Recent Students</h2>
-                            <p>Manage your recently registered students.</p>
+                            <h2>Upcoming Assignments</h2>
+                            <p>Recent tasks with closest deadlines.</p>
                         </div>
-
-                        <button class="secondary-button">
-                            View All
-                            <i class="fa-solid fa-arrow-right"></i>
-                        </button>
+                        <a href="#tasks" class="secondary-button">
+                            Manage All <i class="fa-solid fa-arrow-right"></i>
+                        </a>
                     </div>
 
                     <div class="table-container">
@@ -217,7 +186,7 @@
                                 </tr>
                             </thead>
 
-                            <tbody id="studentsTableBody">
+                            <tbody>
                                 <tr>
                                     <td>
                                         <div class="student-cell">
@@ -319,22 +288,18 @@
                             </tbody>
                         </table>
                     </div>
-
                 </section>
 
             </div>
-            <!-- End Page Content -->
 
             <!-- Footer -->
             <footer class="footer">
-                <p>© 2026 EduManage. Student Management System.</p>
+                <p>© 2026 StudySphere — Built for Students</p>
             </footer>
 
         </main>
     </div>
 
-    <!-- JavaScript -->
     <script src="js/main.js"></script>
-
 </body>
 </html>
