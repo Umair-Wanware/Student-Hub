@@ -92,6 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (currentHash === "tasks") renderTasksPage();
     };
 
+<<<<<<< HEAD
     window.deleteTask = (id) => {
         tasks = tasks.filter(t => t.id !== id);
         saveTasks();
@@ -100,6 +101,175 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Render Dynamic Page Views
+=======
+    let cachedStudents = [];
+
+    function escapeHTML(value) {
+        return String(value ?? "").replace(/[&<>"']/g, character => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        })[character]);
+    }
+
+    function initials(name) {
+        return String(name || "?")
+            .trim()
+            .split(/\s+/)
+            .slice(0, 2)
+            .map(part => part.charAt(0).toUpperCase())
+            .join("");
+    }
+
+    function studentCode(id) {
+        return `STU-${new Date().getFullYear()}-${String(id).padStart(3, "0")}`;
+    }
+
+    function studentRow(student, index) {
+        const avatarClasses = ["purple", "blue", "green", "orange"];
+        const avatarClass = avatarClasses[index % avatarClasses.length];
+
+        return `
+            <tr>
+                <td>
+                    <div class="student-cell">
+                        <div class="student-avatar ${avatarClass}">${escapeHTML(initials(student.name))}</div>
+                        <div>
+                            <h4>${escapeHTML(student.name)}</h4>
+                            <p>${escapeHTML(student.email)}</p>
+                        </div>
+                    </div>
+                </td>
+                <td>${escapeHTML(studentCode(student.id))}</td>
+                <td>${escapeHTML(student.course)}</td>
+                <td><span class="status active-status">Active</span></td>
+                <td>
+                    <button class="action-button" type="button"
+                        aria-label="More actions for ${escapeHTML(student.name)}"
+                        title="Student ID: ${escapeHTML(student.id)}">
+                        <i class="fa-solid fa-ellipsis"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }
+
+    function renderStudents(students) {
+        cachedStudents = Array.isArray(students) ? students : [];
+
+        const tableBody = document.getElementById("studentsTableBody");
+        if (tableBody) {
+            if (cachedStudents.length === 0) {
+                tableBody.innerHTML = `
+                    <tr><td colspan="5">No students found. Add your first student.</td></tr>
+                `;
+            } else {
+                tableBody.innerHTML = cachedStudents
+                    .map((student, index) => studentRow(student, index))
+                    .join("");
+            }
+        }
+
+        const totalCount = document.getElementById("totalStudentsCount");
+        if (totalCount) {
+            totalCount.textContent = cachedStudents.length.toLocaleString();
+        }
+
+        const studentsCount = document.getElementById("studentsPageCount");
+        if (studentsCount) {
+            studentsCount.textContent = `${cachedStudents.length} student${cachedStudents.length === 1 ? "" : "s"}`;
+        }
+    }
+
+    async function loadStudents() {
+        const tableBody = document.getElementById("studentsTableBody");
+        if (tableBody) {
+            tableBody.innerHTML = '<tr><td colspan="5">Loading students...</td></tr>';
+        }
+
+        try {
+            const response = await fetch(API_URL);
+            const result = await response.json();
+
+            if (!response.ok || result.success === false) {
+                throw new Error(result.message || "Could not load students.");
+            }
+
+            renderStudents(result.data || []);
+        } catch (error) {
+            console.error("Unable to load students:", error);
+            if (tableBody) {
+                tableBody.innerHTML = `
+                    <tr><td colspan="5">Could not load students. Check that the backend is running.</td></tr>
+                `;
+            }
+        }
+    }
+
+    function updateGreeting() {
+        const heading = pageContent.querySelector(
+            ".welcome-section h2"
+        );
+
+        if (!heading) return;
+
+        const hour = new Date().getHours();
+
+        let greeting = "Welcome back";
+
+        if (hour < 12) {
+            greeting = "Good morning";
+        } else if (hour < 17) {
+            greeting = "Good afternoon";
+        } else {
+            greeting = "Good evening";
+        }
+
+        heading.textContent = `${greeting}, Admin! 👋`;
+    }
+
+    function studentsPageMarkup() {
+        return `
+            <section class="welcome-section page-heading">
+                <div>
+                    <h2><i class="fa-solid fa-users"></i> Students</h2>
+                    <p>Manage student records and profiles.</p>
+                </div>
+                <button class="primary-button" id="addStudentButton" type="button">
+                    <i class="fa-solid fa-plus"></i> Add Student
+                </button>
+            </section>
+
+            <section class="content-card">
+                <div class="section-header">
+                    <div>
+                        <h2>All Students</h2>
+                        <p id="studentsPageCount">Loading students...</p>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>STUDENT</th>
+                                <th>STUDENT ID</th>
+                                <th>COURSE</th>
+                                <th>STATUS</th>
+                                <th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <tr><td colspan="5">Loading students...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        `;
+    }
+
+>>>>>>> refs/remotes/origin/main
     function showPage(page) {
         navLinks.forEach(link => {
             link.classList.toggle("active", link.dataset.page === page);
