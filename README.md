@@ -2,16 +2,16 @@
 
 ## Backend setup
 
-1. Install dependencies and copy `.env.example` to `.env`:
+1. Install dependencies:
 
    ```sh
    npm install
-   cp .env.example .env
    ```
 
-2. Set the local PostgreSQL values in `.env`. Generate a session secret with
-   `openssl rand -base64 48` and put the result in `SESSION_SECRET`. Keep it
-   private and use a different secret in each environment.
+2. Configure local PostgreSQL values in your environment. The app loads
+   `.env.local` before `.env`; keep local secrets in the ignored `.env.local`
+   file and do not overwrite an existing `.env`. Generate a session secret with
+   `openssl rand -base64 48`, and use a different secret in each environment.
 3. Create the database named by `DB_NAME`, then initialize its tables:
 
    ```sh

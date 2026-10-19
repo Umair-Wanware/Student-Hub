@@ -1,4 +1,5 @@
-require("dotenv").config();
+require("dotenv").config({ path: ".env.local", quiet: true });
+require("dotenv").config({ quiet: true });
 
 if (!process.env.SESSION_SECRET || Buffer.byteLength(process.env.SESSION_SECRET) < 32) {
     throw new Error("SESSION_SECRET must be set to a random value of at least 32 bytes.");

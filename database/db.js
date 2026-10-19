@@ -1,3 +1,4 @@
+require("dotenv").config({ path: ".env.local", quiet: true });
 require("dotenv").config({ quiet: true });
 
 const { Pool } = require("pg");
