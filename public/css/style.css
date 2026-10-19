@@ -937,3 +937,15 @@ a {
         pointer-events: auto; /* Active hone par click accept karega */
     }
 }
+body, html {
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.app-container {
+    max-width: 100vw;
+    min-width: 0;
+    overflow-x: hidden;
+}
