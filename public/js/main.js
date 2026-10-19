@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", () => {
     const API_BASE = "/api";
     const pageContent = document.getElementById("page-content");
@@ -663,3 +664,31 @@ document.addEventListener("DOMContentLoaded", () => {
         renderPage(currentPage());
     }).catch(() => window.location.replace("/login.html"));
 });
+// Mobile Sidebar Toggle Logic
+const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
+const sidebar = document.querySelector(".sidebar");
+
+if (mobileMenuToggle && sidebar) {
+    mobileMenuToggle.addEventListener("click", () => {
+        sidebar.classList.toggle("mobile-open");
+    });
+
+    // Jab user koi nav link click kare mobile par, toh sidebar auto-close ho jaye
+    navLinks.forEach(link => {
+        link.addEventListener("click", () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove("mobile-open");
+            }
+        });
+    });
+
+    // Sidebar ke bahar click karne par close ho jaye
+    document.addEventListener("click", (e) => {
+        if (window.innerWidth <= 768 && 
+            !sidebar.contains(e.target) && 
+            !mobileMenuToggle.contains(e.target) && 
+            sidebar.classList.contains("mobile-open")) {
+            sidebar.classList.remove("mobile-open");
+        }
+    });
+}

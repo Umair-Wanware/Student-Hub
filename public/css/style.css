@@ -674,16 +674,46 @@ a {
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* Mobile Hamburger Toggle Button - Desktop par hide rahega */
+#mobile-menu-toggle {
+    display: none;
+}
+
 @media (max-width: 768px) {
-    .sidebar { width: 70px; padding: 20px 10px; }
-    .brand > div:last-child, .nav-label, .nav-link span, .sidebar-bottom { display: none; }
-    .nav-link { justify-content: center; }
-    .main-content { margin-left: 70px; padding: 20px 16px; }
-    .stats-grid { grid-template-columns: 1fr; }
-    .task-item { align-items: flex-start; gap: 12px; }
-    .task-actions { flex-direction: column; align-items: flex-end; }
-    .note-form-grid { grid-template-columns: 1fr; }
-    .timer-controls { flex-wrap: wrap; justify-content: center; }
+    /* Show mobile menu button */
+    #mobile-menu-toggle {
+        display: grid;
+        place-items: center;
+    }
+
+    /* Sidebar as a sliding drawer on mobile */
+    .sidebar {
+        width: 260px;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
+        z-index: 100;
+    }
+
+    /* Jab mobile menu open hoga */
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    /* Main content margin mobile par 0 kar dein taaki full width mile */
+    .main-content {
+        margin-left: 0;
+        padding: 20px 16px;
+    }
+
+    /* Profile text hide on very small screens */
+    .profile-summary > div:last-child {
+        display: none;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Account */
