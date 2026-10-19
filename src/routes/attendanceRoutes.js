@@ -74,8 +74,8 @@ router.get("/", async (req, res) => {
     const pagination = parsePagination(req.query);
     if (pagination.error) return sendValidationError(res, pagination.error);
 
-    const params = [];
-    let whereClause = "";
+    const params = [req.user.id];
+    let whereClause = "WHERE user_id = $1";
     if (req.query.search !== undefined) {
         const search = parseText(req.query.search, {
             field: "Search",
@@ -83,7 +83,7 @@ router.get("/", async (req, res) => {
         });
         if (search.error) return sendValidationError(res, search.error);
         params.push(`%${search.value}%`);
-        whereClause = "WHERE subject ILIKE $1";
+        whereClause = "WHERE user_id = $1 AND subject ILIKE $2";
     }
 
     try {
@@ -109,8 +109,8 @@ router.get("/", async (req, res) => {
 router.get("/:id", validateResourceId, async (req, res) => {
     try {
         const result = await pool.query(
-            `SELECT ${attendanceColumns} FROM attendance WHERE id = $1`,
-            [req.params.id]
+            `SELECT ${attendanceColumns} FROM attendance WHERE id = $1 AND user_id = $2`,
+            [req.params.id, req.user.id]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, message: "Attendance record not found." });
@@ -128,10 +128,10 @@ router.post("/", async (req, res) => {
     const record = validation.value;
     try {
         const result = await pool.query(
-            `INSERT INTO attendance (subject, attended, total)
-             VALUES ($1, $2, $3)
+            `INSERT INTO attendance (subject, attended, total, user_id)
+             VALUES ($1, $2, $3, $4)
              RETURNING ${attendanceColumns}`,
-            [record.subject, record.attended, record.total]
+            [record.subject, record.attended, record.total, req.user.id]
         );
         return res.status(201).json({
             success: true,
@@ -153,8 +153,8 @@ async function updateAttendance(req, res, partial) {
     if (validation.error) return sendValidationError(res, validation.error);
 
     const currentResult = await pool.query(
-        "SELECT attended, total FROM attendance WHERE id = $1",
-        [req.params.id]
+        "SELECT attended, total FROM attendance WHERE id = $1 AND user_id = $2",
+        [req.params.id, req.user.id]
     );
     if (currentResult.rows.length === 0) {
         return res.status(404).json({ success: false, message: "Attendance record not found." });
@@ -176,9 +176,9 @@ async function updateAttendance(req, res, partial) {
         const result = await pool.query(
             `UPDATE attendance
              SET ${updates.join(", ")}
-             WHERE id = $${values.length + 1}
+             WHERE id = $${values.length + 1} AND user_id = $${values.length + 2}
              RETURNING ${attendanceColumns}`,
-            [...values, req.params.id]
+            [...values, req.params.id, req.user.id]
         );
         return res.status(200).json({
             success: true,
@@ -201,8 +201,8 @@ router.patch("/:id", validateResourceId, (req, res) => updateAttendance(req, res
 router.delete("/:id", validateResourceId, async (req, res) => {
     try {
         const result = await pool.query(
-            `DELETE FROM attendance WHERE id = $1 RETURNING ${attendanceColumns}`,
-            [req.params.id]
+            `DELETE FROM attendance WHERE id = $1 AND user_id = $2 RETURNING ${attendanceColumns}`,
+            [req.params.id, req.user.id]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, message: "Attendance record not found." });

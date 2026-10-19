@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6759e8">
+    <title>Log in · StudySphere</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="js/auth.js" defer></script>
+</head>
+<body class="auth-page">
+    <main class="auth-layout">
+        <a class="auth-brand" href="/login.html"><span class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></span><span><strong>StudySphere</strong><small>Student productivity hub</small></span></a>
+        <section class="auth-panel" aria-labelledby="auth-title">
+            <p class="auth-kicker">WELCOME BACK</p>
+            <h1 id="auth-title">Log in to your hub</h1>
+            <p class="auth-intro">Pick up where your next study session begins.</p>
+            <p class="auth-message" id="auth-message" role="status" aria-live="polite"></p>
+            <form id="auth-form" data-mode="login">
+                <label class="form-group">Email address
+                    <input class="form-control" type="email" name="email" autocomplete="email" maxlength="150" required>
+                </label>
+                <label class="form-group">Password
+                    <span class="password-field"><input class="form-control" type="password" name="password" autocomplete="current-password" required><button class="password-toggle" type="button" data-password-toggle aria-label="Show password"><i class="fa-regular fa-eye"></i></button></span>
+                </label>
+                <button class="primary-button auth-submit" type="submit"><i class="fa-solid fa-arrow-right-to-bracket"></i><span>Log in</span></button>
+            </form>
+            <p class="auth-switch">New to StudySphere? <a href="/register.html">Create an account</a></p>
+        </section>
+        <p class="auth-footer">Your study space, ready when you are.</p>
+    </main>
+</body>
+</html>

@@ -8,19 +8,19 @@ router.get("/", async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT
-                (SELECT COUNT(*)::int FROM tasks WHERE completed = false) AS "pendingTasks",
-                (SELECT COUNT(*)::int FROM notes) AS "totalNotes",
+                (SELECT COUNT(*)::int FROM tasks WHERE user_id = $1 AND completed = false) AS "pendingTasks",
+                (SELECT COUNT(*)::int FROM notes WHERE user_id = $1) AS "totalNotes",
                 COALESCE(
-                    (SELECT ROUND(SUM(attended)::numeric / NULLIF(SUM(total), 0) * 100, 2) FROM attendance),
+                    (SELECT ROUND(SUM(attended)::numeric / NULLIF(SUM(total), 0) * 100, 2) FROM attendance WHERE user_id = $1),
                     0
                 )::float AS "attendanceAverage",
                 COALESCE(
                     (SELECT SUM(duration_minutes)::int
                      FROM focus_sessions
-                     WHERE completed_at::date = CURRENT_DATE),
+                     WHERE user_id = $1 AND completed_at::date = CURRENT_DATE),
                     0
                 ) AS "focusMinutesToday"
-        `);
+        `, [req.user.id]);
         const upcomingTasks = await pool.query(`
             SELECT
                 id,
@@ -30,10 +30,10 @@ router.get("/", async (req, res) => {
                 priority,
                 completed
             FROM tasks
-            WHERE completed = false
+            WHERE user_id = $1 AND completed = false
             ORDER BY due_date ASC, id DESC
             LIMIT 5
-        `);
+        `, [req.user.id]);
 
         return res.status(200).json({
             success: true,

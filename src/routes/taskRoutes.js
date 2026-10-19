@@ -84,10 +84,10 @@ function validateTaskPayload(body, { partial = false } = {}) {
     return { value: task };
 }
 
-async function getTaskById(id) {
+async function getTaskById(id, userId) {
     const result = await pool.query(
-        `SELECT ${taskColumns} FROM tasks WHERE id = $1`,
-        [id]
+        `SELECT ${taskColumns} FROM tasks WHERE id = $1 AND user_id = $2`,
+        [id, userId]
     );
     return result.rows[0];
 }
@@ -96,8 +96,8 @@ router.get("/", async (req, res) => {
     const pagination = parsePagination(req.query);
     if (pagination.error) return sendValidationError(res, pagination.error);
 
-    const conditions = [];
-    const params = [];
+    const conditions = ["user_id = $1"];
+    const params = [req.user.id];
 
     if (req.query.completed !== undefined) {
         const completed = parseBoolean(req.query.completed);
@@ -144,7 +144,7 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", validateResourceId, async (req, res) => {
     try {
-        const task = await getTaskById(req.params.id);
+        const task = await getTaskById(req.params.id, req.user.id);
         if (!task) {
             return res.status(404).json({ success: false, message: "Task not found." });
         }
@@ -161,10 +161,10 @@ router.post("/", async (req, res) => {
     const task = validation.value;
     try {
         const result = await pool.query(
-            `INSERT INTO tasks (title, subject, due_date, priority, completed)
-             VALUES ($1, $2, $3, $4, $5)
+            `INSERT INTO tasks (title, subject, due_date, priority, completed, user_id)
+             VALUES ($1, $2, $3, $4, $5, $6)
              RETURNING ${taskColumns}`,
-            [task.title, task.subject, task.dueDate, task.priority, task.completed]
+            [task.title, task.subject, task.dueDate, task.priority, task.completed, req.user.id]
         );
         return res.status(201).json({
             success: true,
@@ -197,9 +197,9 @@ async function updateTask(req, res, partial) {
         const result = await pool.query(
             `UPDATE tasks
              SET ${updates.join(", ")}
-             WHERE id = $${values.length + 1}
+             WHERE id = $${values.length + 1} AND user_id = $${values.length + 2}
              RETURNING ${taskColumns}`,
-            [...values, req.params.id]
+            [...values, req.params.id, req.user.id]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, message: "Task not found." });
@@ -220,8 +220,8 @@ router.patch("/:id", validateResourceId, (req, res) => updateTask(req, res, true
 router.delete("/:id", validateResourceId, async (req, res) => {
     try {
         const result = await pool.query(
-            `DELETE FROM tasks WHERE id = $1 RETURNING ${taskColumns}`,
-            [req.params.id]
+            `DELETE FROM tasks WHERE id = $1 AND user_id = $2 RETURNING ${taskColumns}`,
+            [req.params.id, req.user.id]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, message: "Task not found." });

@@ -62,8 +62,8 @@ router.get("/", async (req, res) => {
     const pagination = parsePagination(req.query);
     if (pagination.error) return sendValidationError(res, pagination.error);
 
-    const params = [];
-    let whereClause = "";
+    const params = [req.user.id];
+    let whereClause = "WHERE user_id = $1";
 
     if (req.query.search !== undefined) {
         const search = parseText(req.query.search, {
@@ -73,7 +73,7 @@ router.get("/", async (req, res) => {
         if (search.error) return sendValidationError(res, search.error);
 
         params.push(`%${search.value}%`);
-        whereClause = `WHERE title ILIKE $1 OR content ILIKE $1`;
+        whereClause = `WHERE user_id = $1 AND (title ILIKE $2 OR content ILIKE $2)`;
     }
 
     try {
@@ -99,8 +99,8 @@ router.get("/", async (req, res) => {
 router.get("/:id", validateResourceId, async (req, res) => {
     try {
         const result = await pool.query(
-            `SELECT ${noteColumns} FROM notes WHERE id = $1`,
-            [req.params.id]
+            `SELECT ${noteColumns} FROM notes WHERE id = $1 AND user_id = $2`,
+            [req.params.id, req.user.id]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, message: "Note not found." });
@@ -118,10 +118,10 @@ router.post("/", async (req, res) => {
     const note = validation.value;
     try {
         const result = await pool.query(
-            `INSERT INTO notes (title, content, note_date)
-             VALUES ($1, $2, COALESCE($3::date, CURRENT_DATE))
+            `INSERT INTO notes (title, content, note_date, user_id)
+             VALUES ($1, $2, COALESCE($3::date, CURRENT_DATE), $4)
              RETURNING ${noteColumns}`,
-            [note.title, note.content, note.date || null]
+            [note.title, note.content, note.date || null, req.user.id]
         );
         return res.status(201).json({
             success: true,
@@ -148,9 +148,9 @@ async function updateNote(req, res, partial) {
         const result = await pool.query(
             `UPDATE notes
              SET ${updates.join(", ")}
-             WHERE id = $${values.length + 1}
+             WHERE id = $${values.length + 1} AND user_id = $${values.length + 2}
              RETURNING ${noteColumns}`,
-            [...values, req.params.id]
+            [...values, req.params.id, req.user.id]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, message: "Note not found." });
@@ -171,8 +171,8 @@ router.patch("/:id", validateResourceId, (req, res) => updateNote(req, res, true
 router.delete("/:id", validateResourceId, async (req, res) => {
     try {
         const result = await pool.query(
-            `DELETE FROM notes WHERE id = $1 RETURNING ${noteColumns}`,
-            [req.params.id]
+            `DELETE FROM notes WHERE id = $1 AND user_id = $2 RETURNING ${noteColumns}`,
+            [req.params.id, req.user.id]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, message: "Note not found." });

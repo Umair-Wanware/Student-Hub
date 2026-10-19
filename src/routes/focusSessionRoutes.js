@@ -52,13 +52,13 @@ router.get("/", async (req, res) => {
     const pagination = parsePagination(req.query);
     if (pagination.error) return sendValidationError(res, pagination.error);
 
-    const params = [];
-    let whereClause = "";
+    const params = [req.user.id];
+    let whereClause = "WHERE user_id = $1";
     if (req.query.date !== undefined) {
         const date = parseDateOnly(req.query.date);
         if (!date) return sendValidationError(res, "Date must be a valid YYYY-MM-DD date.");
         params.push(date);
-        whereClause = "WHERE completed_at::date = $1::date";
+        whereClause = "WHERE user_id = $1 AND completed_at::date = $2::date";
     }
 
     try {
@@ -88,10 +88,10 @@ router.post("/", async (req, res) => {
     const session = validation.value;
     try {
         const result = await pool.query(
-            `INSERT INTO focus_sessions (duration_minutes, completed_at)
-             VALUES ($1, COALESCE($2::timestamptz, CURRENT_TIMESTAMP))
+            `INSERT INTO focus_sessions (duration_minutes, completed_at, user_id)
+             VALUES ($1, COALESCE($2::timestamptz, CURRENT_TIMESTAMP), $3)
              RETURNING ${sessionColumns}`,
-            [session.durationMinutes, session.completedAt || null]
+            [session.durationMinutes, session.completedAt || null, req.user.id]
         );
         return res.status(201).json({
             success: true,
@@ -106,8 +106,8 @@ router.post("/", async (req, res) => {
 router.delete("/:id", validateResourceId, async (req, res) => {
     try {
         const result = await pool.query(
-            `DELETE FROM focus_sessions WHERE id = $1 RETURNING ${sessionColumns}`,
-            [req.params.id]
+            `DELETE FROM focus_sessions WHERE id = $1 AND user_id = $2 RETURNING ${sessionColumns}`,
+            [req.params.id, req.user.id]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, message: "Focus session not found." });

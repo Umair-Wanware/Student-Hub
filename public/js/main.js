@@ -3,13 +3,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const pageContent = document.getElementById("page-content");
     const navLinks = [...document.querySelectorAll(".nav-link")];
     const themeToggle = document.getElementById("theme-toggle");
+    let csrfToken = null;
+    let currentUser = null;
     const pageTitles = {
         dashboard: "Dashboard",
         tasks: "Assignments & Tasks",
         "focus-zone": "Focus Zone",
         attendance: "Attendance",
         notes: "Quick Notes",
-        analytics: "Analytics"
+        analytics: "Analytics",
+        account: "Account"
     };
     const focusState = {
         duration: 25,
@@ -72,12 +75,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function api(path, options = {}) {
+        const method = options.method || "GET";
+        const headers = { ...options.headers };
+        if (options.body) headers["Content-Type"] = "application/json";
+        if (!["GET", "HEAD", "OPTIONS"].includes(method.toUpperCase())) {
+            if (!csrfToken) {
+                const csrfResponse = await fetch(`${API_BASE}/auth/csrf`, { credentials: "same-origin" });
+                const csrfPayload = await csrfResponse.json();
+                csrfToken = csrfPayload.csrfToken;
+            }
+            headers["X-CSRF-Token"] = csrfToken;
+        }
         const response = await fetch(`${API_BASE}${path}`, {
-            headers: {
-                ...(options.body ? { "Content-Type": "application/json" } : {}),
-                ...options.headers
-            },
-            ...options
+            ...options,
+            method,
+            credentials: "same-origin",
+            headers
         });
         const contentType = response.headers.get("content-type") || "";
         const payload = contentType.includes("application/json")
@@ -85,6 +98,9 @@ document.addEventListener("DOMContentLoaded", () => {
             : null;
 
         if (!response.ok || !payload?.success) {
+            if (response.status === 401 && path !== "/auth/me") {
+                window.location.replace("/login.html");
+            }
             throw new Error(payload?.message || "The request could not be completed.");
         }
         return payload;
@@ -101,6 +117,12 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelector(".topbar h1").textContent = title;
         document.querySelector(".breadcrumb").textContent = `Pages / ${title}`;
         navLinks.forEach(link => link.classList.toggle("active", link.dataset.page === page));
+        document.querySelectorAll("[data-user-name]").forEach(element => {
+            element.textContent = currentUser?.name || "Student";
+        });
+        document.querySelectorAll("[data-user-role]").forEach(element => {
+            element.textContent = currentUser?.role || "Student";
+        });
     }
 
     function renderError(error) {
@@ -173,7 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function dashboardMarkup() {
         return `
             <section class="welcome-section">
-                <div><h2>${greeting()}! 👋</h2><p>Stay organized, protect your focus, and keep moving forward.</p></div>
+                <div><h2>${greeting()}, ${escapeHTML(currentUser?.name || "Student")}</h2><p>Stay organized, protect your focus, and keep moving forward.</p></div>
                 <a href="#tasks" class="primary-button"><i class="fa-solid fa-plus"></i> Add new task</a>
             </section>
             <section class="stats-grid">
@@ -538,6 +560,67 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) { renderError(error); }
     }
 
+    async function renderAccount() {
+        pageContent.innerHTML = `
+            <section class="welcome-section page-heading"><div><h2>Your account</h2><p>Manage your profile and sign-in details.</p></div></section>
+            <section class="content-card account-summary">
+                <div class="section-header"><div><h2>Profile details</h2><p>Your account information and access level.</p></div></div>
+                <dl class="account-details">
+                    <div><dt>Full name</dt><dd>${escapeHTML(currentUser.name)}</dd></div>
+                    <div><dt>Email address</dt><dd>${escapeHTML(currentUser.email)}</dd></div>
+                    <div><dt>Role</dt><dd>${escapeHTML(currentUser.role)}</dd></div>
+                    <div><dt>Created</dt><dd>${escapeHTML(formatDate(currentUser.createdAt))}</dd></div>
+                </dl>
+            </section>
+            <section class="content-card">
+                <div class="section-header"><div><h2>Update profile</h2><p>Change your name or email address.</p></div></div>
+                <form id="profile-form"><div class="form-grid">
+                    <label class="form-group">Full name<input class="form-control" name="name" maxlength="100" required value="${escapeHTML(currentUser.name)}"></label>
+                    <label class="form-group">Email address<input class="form-control" name="email" type="email" maxlength="150" required value="${escapeHTML(currentUser.email)}"></label>
+                </div><button class="primary-button" type="submit">Save profile</button></form>
+            </section>
+            <section class="content-card">
+                <div class="section-header"><div><h2>Change password</h2><p>Use 12+ characters with upper and lowercase letters, a number, and a symbol.</p></div></div>
+                <form id="password-form"><div class="form-grid">
+                    <label class="form-group">Current password<input class="form-control" name="currentPassword" type="password" autocomplete="current-password" required></label>
+                    <label class="form-group">New password<input class="form-control" name="newPassword" type="password" autocomplete="new-password" minlength="12" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,}" title="Use at least 12 characters with uppercase and lowercase letters, a number, and a symbol." required></label>
+                    <label class="form-group">Confirm new password<input class="form-control" name="confirmPassword" type="password" autocomplete="new-password" minlength="12" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,}" title="Use at least 12 characters with uppercase and lowercase letters, a number, and a symbol." required></label>
+                </div><button class="primary-button" type="submit">Change password</button></form>
+            </section>
+        `;
+
+        document.getElementById("profile-form").addEventListener("submit", async event => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const button = form.querySelector("button[type=submit]");
+            const values = new FormData(form);
+            button.disabled = true;
+            try {
+                const result = await api("/auth/profile", { method: "PATCH", body: JSON.stringify({ name: values.get("name"), email: values.get("email") }) });
+                currentUser = { ...currentUser, ...result.user };
+                updateChrome("account");
+                showNotice("Profile updated.");
+                await renderAccount();
+            } catch (error) { showNotice(error.message, "error"); }
+            finally { button.disabled = false; }
+        });
+
+        document.getElementById("password-form").addEventListener("submit", async event => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const button = form.querySelector("button[type=submit]");
+            const values = new FormData(form);
+            button.disabled = true;
+            try {
+                await api("/auth/password", { method: "PATCH", body: JSON.stringify(Object.fromEntries(values)) });
+                csrfToken = null;
+                form.reset();
+                showNotice("Password changed. Other sessions have been signed out.");
+            } catch (error) { showNotice(error.message, "error"); }
+            finally { button.disabled = false; }
+        });
+    }
+
     async function renderPage(page) {
         const selectedPage = Object.hasOwn(pageTitles, page) ? page : "dashboard";
         updateChrome(selectedPage);
@@ -546,6 +629,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (selectedPage === "focus-zone") return renderFocus();
         if (selectedPage === "attendance") return renderAttendance();
         if (selectedPage === "notes") return renderNotes();
+        if (selectedPage === "account") return renderAccount();
         return renderAnalytics();
     }
 
@@ -560,7 +644,22 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("studysphere_theme", isDark ? "dark" : "light");
         applyTheme();
     });
+    document.getElementById("logout-button").addEventListener("click", async () => {
+        const button = document.getElementById("logout-button");
+        button.disabled = true;
+        try {
+            await api("/auth/logout", { method: "POST" });
+            window.location.replace("/login.html");
+        } catch (error) {
+            showNotice(error.message, "error");
+            button.disabled = false;
+        }
+    });
     window.addEventListener("hashchange", () => renderPage(currentPage()));
     applyTheme();
-    renderPage(currentPage());
+    api("/auth/me").then(({ user }) => {
+        currentUser = user;
+        updateChrome(currentPage());
+        renderPage(currentPage());
+    }).catch(() => window.location.replace("/login.html"));
 });

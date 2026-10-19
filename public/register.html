@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6759e8">
+    <title>Create account · StudySphere</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="js/auth.js" defer></script>
+</head>
+<body class="auth-page">
+    <main class="auth-layout">
+        <a class="auth-brand" href="/login.html"><span class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></span><span><strong>StudySphere</strong><small>Student productivity hub</small></span></a>
+        <section class="auth-panel" aria-labelledby="auth-title">
+            <p class="auth-kicker">YOUR NEXT CHAPTER</p>
+            <h1 id="auth-title">Create your account</h1>
+            <p class="auth-intro">A calmer place to plan, focus, and keep track.</p>
+            <p class="auth-message" id="auth-message" role="status" aria-live="polite"></p>
+            <form id="auth-form" data-mode="register">
+                <label class="form-group">Full name
+                    <input class="form-control" type="text" name="name" autocomplete="name" maxlength="100" required>
+                </label>
+                <label class="form-group">Email address
+                    <input class="form-control" type="email" name="email" autocomplete="email" maxlength="150" required>
+                </label>
+                <label class="form-group">Password
+                    <span class="password-field"><input class="form-control" type="password" name="password" autocomplete="new-password" minlength="12" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,}" title="Use at least 12 characters with uppercase and lowercase letters, a number, and a symbol." required><button class="password-toggle" type="button" data-password-toggle aria-label="Show password"><i class="fa-regular fa-eye"></i></button></span>
+                </label>
+                <label class="form-group">Confirm password
+                    <span class="password-field"><input class="form-control" type="password" name="confirmPassword" autocomplete="new-password" minlength="12" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,}" title="Use at least 12 characters with uppercase and lowercase letters, a number, and a symbol." required><button class="password-toggle" type="button" data-password-toggle aria-label="Show password"><i class="fa-regular fa-eye"></i></button></span>
+                </label>
+                <p class="password-hint">Use 12+ characters with uppercase and lowercase letters, a number, and a symbol.</p>
+                <button class="primary-button auth-submit" type="submit"><i class="fa-solid fa-user-plus"></i><span>Create account</span></button>
+            </form>
+            <p class="auth-switch">Already have an account? <a href="/login.html">Log in</a></p>
+        </section>
+        <p class="auth-footer">Your study space, ready when you are.</p>
+    </main>
+</body>
+</html>
