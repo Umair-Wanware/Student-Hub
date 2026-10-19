@@ -1,7 +1,7 @@
 require("dotenv").config();
 
-if (!process.env.JWT_SECRET) {
-    throw new Error("JWT_SECRET is missing from .env");
+if (!process.env.SESSION_SECRET || Buffer.byteLength(process.env.SESSION_SECRET) < 32) {
+    throw new Error("SESSION_SECRET must be set to a random value of at least 32 bytes.");
 }
 
 const app = require("./src/app");
