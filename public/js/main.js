@@ -664,31 +664,42 @@ document.addEventListener("DOMContentLoaded", () => {
         renderPage(currentPage());
     }).catch(() => window.location.replace("/login.html"));
 });
-// Mobile Sidebar Toggle Logic
 const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
+const sidebarCloseBtn = document.getElementById("sidebar-close-btn");
 const sidebar = document.querySelector(".sidebar");
+const overlay = document.getElementById("sidebar-overlay");
+const navLinks = document.querySelectorAll(".nav-link");
 
-if (mobileMenuToggle && sidebar) {
-    mobileMenuToggle.addEventListener("click", () => {
-        sidebar.classList.toggle("mobile-open");
-    });
+function openSidebar() {
+    sidebar.classList.add("mobile-open");
+    overlay.classList.add("active");
+}
 
-    // Jab user koi nav link click kare mobile par, toh sidebar auto-close ho jaye
-    navLinks.forEach(link => {
-        link.addEventListener("click", () => {
-            if (window.innerWidth <= 768) {
-                sidebar.classList.remove("mobile-open");
-            }
-        });
-    });
+function closeSidebar() {
+    sidebar.classList.remove("mobile-open");
+    overlay.classList.remove("active");
+}
 
-    // Sidebar ke bahar click karne par close ho jaye
-    document.addEventListener("click", (e) => {
-        if (window.innerWidth <= 768 && 
-            !sidebar.contains(e.target) && 
-            !mobileMenuToggle.contains(e.target) && 
-            sidebar.classList.contains("mobile-open")) {
-            sidebar.classList.remove("mobile-open");
+// Hamburger icon click -> Open
+if (mobileMenuToggle) {
+    mobileMenuToggle.addEventListener("click", openSidebar);
+}
+
+// Close (X) button click -> Close
+if (sidebarCloseBtn) {
+    sidebarCloseBtn.addEventListener("click", closeSidebar);
+}
+
+// Outside Dark Overlay click -> Close
+if (overlay) {
+    overlay.addEventListener("click", closeSidebar);
+}
+
+// Any nav link click on mobile -> Auto Close
+navLinks.forEach(link => {
+    link.addEventListener("click", () => {
+        if (window.innerWidth <= 768) {
+            closeSidebar();
         }
     });
-}
+});
