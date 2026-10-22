@@ -1,1093 +1,196 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StudentHub OS | Next-Gen Enterprise Academic Workspace</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-              900: '#312e81',
-            }
-          }
-        }
-      }
-    }
-  </script>
-  
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
-  <!-- FontAwesome & Google Fonts -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-
-  <style>
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-    .font-mono-code {
-      font-family: 'JetBrains Mono', monospace;
-    }
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #475569;
-      border-radius: 9999px;
-    }
-    .glass-card {
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .light .glass-card {
-      background: rgba(255, 255, 255, 0.88);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-    }
-    .perspective-1000 {
-      perspective: 1000px;
-    }
-    .transform-style-3d {
-      transform-style: preserve-3d;
-    }
-    .backface-hidden {
-      backface-visibility: hidden;
-    }
-    .rotate-y-180 {
-      transform: rotateY(180deg);
-    }
-    .glow-indigo {
-      box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.25);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudySphere - Student Productivity Hub</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
+<body>
+    <div class="app-container">
 
-<body class="bg-slate-950 text-slate-100 min-h-screen transition-colors duration-300 light:bg-slate-50 light:text-slate-900">
-
-  <!-- TOP NAVIGATION BAR -->
-  <header class="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md light:bg-white/80 light:border-slate-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      
-      <!-- Logo & Brand -->
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-indigo-400 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 glow-indigo">
-          <i class="fa-solid fa-graduation-cap text-lg"></i>
-        </div>
-        <div>
-          <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent light:from-slate-900 light:to-indigo-600">
-            StudentHub<span class="text-indigo-400 text-xs font-semibold uppercase ml-1 px-1.5 py-0.5 rounded border border-indigo-500/30 bg-indigo-500/10">OS</span>
-          </span>
-          <p class="text-[10px] text-slate-400 font-medium hidden sm:block">Silicon Valley Academic Workspace</p>
-        </div>
-      </div>
-
-      <!-- Quick Command Bar Trigger -->
-      <button onclick="toggleCommandPalette()" class="hidden md:flex items-center space-x-3 bg-slate-900/90 hover:bg-slate-800 text-slate-400 text-xs px-3.5 py-2 rounded-xl border border-slate-800 transition light:bg-slate-100 light:border-slate-200 light:text-slate-600">
-        <i class="fa-solid fa-magnifying-glass text-indigo-400"></i>
-        <span>Quick search & AI commands...</span>
-        <kbd class="font-mono-code bg-slate-800 px-1.5 py-0.5 rounded text-[10px] text-slate-300 border border-slate-700 light:bg-slate-200 light:border-slate-300 light:text-slate-700">Ctrl + K</kbd>
-      </button>
-
-      <!-- Right Header Actions -->
-      <div class="flex items-center space-x-2.5">
-        <!-- Backup & Cloud Export -->
-        <button onclick="exportDataJSON()" title="Export JSON Backup" class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition text-xs light:bg-slate-100 light:border-slate-200 light:text-slate-700">
-          <i class="fa-solid fa-download"></i>
-        </button>
-
-        <button onclick="document.getElementById('importFileInput').click()" title="Restore Backup" class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition text-xs light:bg-slate-100 light:border-slate-200 light:text-slate-700">
-          <i class="fa-solid fa-upload"></i>
-        </button>
-        <input type="file" id="importFileInput" onchange="importDataJSON(event)" class="hidden" accept=".json">
-
-        <!-- Theme Switcher -->
-        <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition text-xs light:bg-slate-100 light:border-slate-200 light:text-slate-700">
-          <i id="themeIcon" class="fa-solid fa-moon text-indigo-400"></i>
-        </button>
-
-        <!-- Profile Avatar -->
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-900 to-slate-900 border border-indigo-500/30 flex items-center justify-center font-bold text-xs text-indigo-300 light:bg-slate-200 light:border-slate-300">
-          CS
-        </div>
-      </div>
-
-    </div>
-  </header>
-
-  <!-- MAIN DASHBOARD CONTENT -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-
-    <!-- HERO METRICS STRIP -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
-        <div>
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Attendance Overall</p>
-          <h4 id="heroAttendance" class="text-2xl font-extrabold text-slate-100 mt-1 light:text-slate-900">82.4%</h4>
-          <span class="text-[11px] text-emerald-400 font-medium"><i class="fa-solid fa-shield-check"></i> Safe Zone (>75%)</span>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center text-xl">
-          <i class="fa-solid fa-chart-line"></i>
-        </div>
-      </div>
-
-      <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
-        <div>
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Target CGPA Goal</p>
-          <h4 id="heroCGPA" class="text-2xl font-extrabold text-slate-100 mt-1 light:text-slate-900">8.50 / 10</h4>
-          <span class="text-[11px] text-indigo-400 font-medium"><i class="fa-solid fa-bullseye"></i> Goal Tracked</span>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-violet-500/10 text-violet-400 border border-violet-500/20 flex items-center justify-center text-xl">
-          <i class="fa-solid fa-award"></i>
-        </div>
-      </div>
-
-      <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
-        <div>
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Next Exam Countdown</p>
-          <h4 class="text-2xl font-extrabold text-slate-100 mt-1 light:text-slate-900">14 Days</h4>
-          <span class="text-[11px] text-amber-400 font-medium"><i class="fa-solid fa-clock"></i> Data Structures</span>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center text-xl">
-          <i class="fa-solid fa-hourglass-half"></i>
-        </div>
-      </div>
-
-      <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
-        <div>
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Sprint Tasks</p>
-          <h4 id="heroTasksCount" class="text-2xl font-extrabold text-slate-100 mt-1 light:text-slate-900">3 Active</h4>
-          <span class="text-[11px] text-indigo-400 font-medium"><i class="fa-solid fa-list-check"></i> Kanban Sprint</span>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-xl">
-          <i class="fa-solid fa-list-check"></i>
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 1: VISUAL ANALYTICS DASHBOARD (CHART.JS) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Study Hours Distribution Chart -->
-      <div class="glass-card p-6 rounded-2xl space-y-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <span class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400"><i class="fa-solid fa-chart-column"></i></span>
-            <h3 class="font-bold text-base text-slate-100 light:text-slate-900">Weekly Focus Hours Analytics</h3>
-          </div>
-          <span class="text-xs font-mono-code text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/20">34.5 hrs total</span>
-        </div>
-        <div class="h-56 relative">
-          <canvas id="focusChart"></canvas>
-        </div>
-      </div>
-
-      <!-- Semester CGPA Progress Trajectory -->
-      <div class="glass-card p-6 rounded-2xl space-y-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <span class="p-2 rounded-lg bg-violet-500/10 text-violet-400"><i class="fa-solid fa-chart-line"></i></span>
-            <h3 class="font-bold text-base text-slate-100 light:text-slate-900">CGPA Growth Trajectory</h3>
-          </div>
-          <span class="text-xs font-mono-code text-violet-400 bg-violet-500/10 px-2.5 py-1 rounded-full border border-violet-500/20">B.Sc CS Track</span>
-        </div>
-        <div class="h-56 relative">
-          <canvas id="cgpaChart"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 2: FOCUS TIMER & AMBIENT SOUND STUDIO -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      
-      <!-- Focus Timer Component -->
-      <div class="lg:col-span-2 glass-card p-6 rounded-2xl flex flex-col justify-between relative overflow-hidden">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center space-x-2">
-            <span class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400"><i class="fa-solid fa-stopwatch"></i></span>
-            <h3 class="font-bold text-lg text-slate-100 light:text-slate-900">Focus Sprint Engine</h3>
-          </div>
-          <span id="streakDisplay" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-900 text-amber-400 border border-slate-800">
-            <i class="fa-solid fa-fire mr-1"></i> 0 Streaks Today
-          </span>
-        </div>
-
-        <div class="flex flex-col sm:flex-row items-center justify-around my-6 space-y-6 sm:space-y-0">
-          <div class="relative w-48 h-48 flex items-center justify-center">
-            <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="6" class="text-slate-800 light:text-slate-200" fill="transparent" />
-              <circle id="timerProgress" cx="50" cy="50" r="42" stroke="currentColor" stroke-width="6" class="text-indigo-500 transition-all duration-1000 ease-linear" fill="transparent" stroke-dasharray="263.89" stroke-dashoffset="0" stroke-linecap="round" />
-            </svg>
-            <div class="absolute text-center">
-              <span id="timerDisplay" class="font-mono-code text-4xl font-extrabold tracking-tight text-slate-100 light:text-slate-900">25:00</span>
-              <p id="timerStatusLabel" class="text-[11px] text-slate-400 uppercase font-medium mt-1">Focus Session</p>
-            </div>
-          </div>
-
-          <div class="space-y-4 text-center sm:text-left">
-            <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
-              <button onclick="setTimerPreset(25, 'Focus Session')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30 transition">25m Focus</button>
-              <button onclick="setTimerPreset(5, 'Short Break')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800 transition light:bg-slate-200 light:text-slate-800">5m Break</button>
-              <button onclick="setTimerPreset(15, 'Long Break')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800 transition light:bg-slate-200 light:text-slate-800">15m Break</button>
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h2>StudySphere</h2>
+                    <p>Productivity Hub</p>
+                </div>
             </div>
 
-            <div class="flex items-center space-x-3 justify-center sm:justify-start">
-              <button id="startTimerBtn" onclick="toggleTimer()" class="px-6 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-500 transition shadow-lg shadow-indigo-600/30 flex items-center space-x-2">
-                <i class="fa-solid fa-play text-xs"></i> <span>Start Session</span>
-              </button>
-              <button onclick="resetTimer()" class="p-2.5 rounded-xl bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 transition light:bg-slate-200 light:text-slate-700">
-                <i class="fa-solid fa-rotate-right"></i>
-              </button>
+            <!-- Navigation -->
+            <div class="nav-section">
+                <p class="nav-label">STUDY TOOLS</p>
+
+                <a href="#dashboard" class="nav-link active" data-page="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="#tasks" class="nav-link" data-page="tasks">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Assignments & Tasks</span>
+                </a>
+
+                <a href="#focus-zone" class="nav-link" data-page="focus-zone">
+                    <i class="fa-solid fa-stopwatch"></i>
+                    <span>Focus zone</span>
+                </a>
+
+                <a href="#attendance" class="nav-link" data-page="attendance">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>Attendance & CGPA</span>
+                </a>
+
+                <a href="#notes" class="nav-link" data-page="notes">
+                    <i class="fa-solid fa-note-sticky"></i>
+                    <span>Quick Notes</span>
+                </a>
+
+                <a href="#analytics" class="nav-link" data-page="analytics">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+
+                <a href="#account" class="nav-link" data-page="account">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span>Account</span>
+                </a>
             </div>
-          </div>
-        </div>
 
-        <p class="text-xs text-slate-500 text-center sm:text-left">Micro-Break Alert: Stay hydrated and stretch every 50 minutes.</p>
-      </div>
+            <!-- Profile Summary Bottom -->
+            <div class="sidebar-bottom">
+                <div class="admin-profile">
+                    <div class="avatar">SH</div>
+                    <div class="admin-info">
+                        <h4 data-user-name>Student</h4>
+                        <p data-user-role>student</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
 
-      <!-- Ambient Sound Studio -->
-      <div class="glass-card p-6 rounded-2xl flex flex-col justify-between">
-        <div>
-          <div class="flex items-center space-x-2 mb-4">
-            <span class="p-2 rounded-lg bg-violet-500/10 text-violet-400"><i class="fa-solid fa-headphones"></i></span>
-            <h3 class="font-bold text-lg text-slate-100 light:text-slate-900">Sound Studio</h3>
-          </div>
-          <p class="text-xs text-slate-400 mb-4">Synthesized white noise generators for deep concentration.</p>
-          
-          <div class="space-y-3">
-            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 light:bg-slate-100 light:border-slate-200">
-              <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-cloud-rain text-indigo-400"></i>
-                <span class="text-xs font-semibold">Gentle Rain</span>
-              </div>
-              <button onclick="toggleAmbient('rain')" id="soundBtn-rain" class="px-3 py-1 text-xs rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-indigo-600 hover:text-white transition">Play</button>
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Topbar -->
+            <header class="topbar">
+                <div>
+                    <p class="breadcrumb">Pages / Dashboard</p>
+                    <h1>Dashboard</h1>
+                </div>
+
+                <div class="topbar-actions">
+                    <button class="icon-button" id="theme-toggle" aria-label="Toggle Theme">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+
+                    <button class="icon-button" id="logout-button" type="button" aria-label="Log out" title="Log out">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </button>
+
+                    <div class="profile-summary">
+                        <div class="avatar">SH</div>
+                        <div>
+                            <h4 data-user-name>Student</h4>
+                            <p data-user-role>student</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div id="page-content">
+
+                <!-- Welcome Section -->
+                <section class="welcome-section">
+                    <div>
+                        <h2>Good day! 👋</h2>
+                        <p>Study Smarter. Stay Organized. Achieve More.</p>
+                    </div>
+                    <a href="#tasks" class="primary-button">
+                        <i class="fa-solid fa-plus"></i> Add New Task
+                    </a>
+                </section>
+
+                <!-- Statistics Grid -->
+                <section class="stats-grid">
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <span>Pending Tasks</span>
+                            <div class="stat-icon purple">
+                                <i class="fa-solid fa-clock"></i>
+                            </div>
+                        </div>
+                        <h2 id="stat-pending-count">0</h2>
+                        <p class="stat-description">Assignments to complete</p>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <span>Total Notes</span>
+                            <div class="stat-icon blue">
+                                <i class="fa-solid fa-file-lines"></i>
+                            </div>
+                        </div>
+                        <h2 id="stat-notes-count">0</h2>
+                        <p class="stat-description">Saved quick notes</p>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <span>Attendance Avg</span>
+                            <div class="stat-icon green">
+                                <i class="fa-solid fa-chart-simple"></i>
+                            </div>
+                        </div>
+                        <h2 id="stat-attendance-avg">0%</h2>
+                        <p class="stat-description"><span class="positive">Tracked</span> subjects</p>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <span>Focus Time</span>
+                            <div class="stat-icon orange">
+                                <i class="fa-solid fa-fire"></i>
+                            </div>
+                        </div>
+                        <h2 id="stat-focus-time">25m</h2>
+                        <p class="stat-description">Today's target</p>
+                    </article>
+                </section>
+
+                <!-- Recent Tasks Widget -->
+                <section class="content-card">
+                    <div class="section-header">
+                        <div>
+                            <h2>Upcoming Assignments</h2>
+                            <p>Recent tasks with closest deadlines.</p>
+                        </div>
+                        <a href="#tasks" class="secondary-button">
+                            Manage All <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <div id="dashboard-task-list" class="task-list-container">
+                        <!-- Dynamic Dashboard Tasks Rendered via JS -->
+                    </div>
+                </section>
+
             </div>
 
-            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 light:bg-slate-100 light:border-slate-200">
-              <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-wave-square text-emerald-400"></i>
-                <span class="text-xs font-semibold">White Noise</span>
-              </div>
-              <button onclick="toggleAmbient('white')" id="soundBtn-white" class="px-3 py-1 text-xs rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-indigo-600 hover:text-white transition">Play</button>
-            </div>
+            <!-- Footer -->
+            <footer class="footer">
+                <p>© 2026 StudySphere — Built for Students</p>
+            </footer>
 
-            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 light:bg-slate-100 light:border-slate-200">
-              <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-water text-cyan-400"></i>
-                <span class="text-xs font-semibold">Ocean Waves</span>
-              </div>
-              <button onclick="toggleAmbient('ocean')" id="soundBtn-ocean" class="px-3 py-1 text-xs rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-indigo-600 hover:text-white transition">Play</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-4 pt-4 border-t border-slate-800 light:border-slate-200">
-          <label class="text-[11px] text-slate-400 font-medium block mb-1">Master Audio Output</label>
-          <input type="range" id="ambientVolume" min="0" max="1" step="0.05" value="0.5" oninput="setAmbientVolume(this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-        </div>
-      </div>
-
+        </main>
     </div>
 
-    <!-- SECTION 3: AI ACADEMIC ASSISTANT WIDGET -->
-    <div class="glass-card p-6 rounded-2xl space-y-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <span class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400"><i class="fa-solid fa-robot"></i></span>
-          <h3 class="font-bold text-lg text-slate-100 light:text-slate-900">AI Academic Assistant & Code Debugger</h3>
-        </div>
-        <span class="text-xs text-emerald-400 font-medium bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20"><i class="fa-solid fa-bolt mr-1"></i> AI Engine Ready</span>
-      </div>
-
-      <div class="space-y-3">
-        <div id="aiResponseBox" class="min-h-[90px] p-4 bg-slate-900/90 rounded-xl border border-slate-800 text-xs font-mono-code text-slate-300 leading-relaxed light:bg-slate-100 light:border-slate-200 light:text-slate-800">
-          Hello! Ask me any computer science concept, Python/C# code bug, or request a quick 5-question quiz...
-        </div>
-
-        <div class="flex space-x-2">
-          <input type="text" id="aiPromptInput" placeholder="Ask AI e.g. 'Explain Binary Search Tree in simple terms'..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 light:bg-white light:border-slate-300 light:text-slate-900">
-          <button onclick="handleAIPrompt()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shadow-md shadow-indigo-600/20 flex items-center space-x-2">
-            <i class="fa-solid fa-paper-plane"></i> <span>Ask AI</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 4: ATTENDANCE TRACKER & BUNK ADVISOR -->
-    <div class="glass-card p-6 rounded-2xl space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center space-x-2">
-          <span class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400"><i class="fa-solid fa-clipboard-user"></i></span>
-          <div>
-            <h3 class="font-bold text-lg text-slate-100 light:text-slate-900">Attendance Tracker & Bunk Advisor</h3>
-            <p class="text-xs text-slate-400">75% Criteria Guard with live class bunk predictions.</p>
-          </div>
-        </div>
-        
-        <button onclick="addSubjectPrompt()" class="px-4 py-2 rounded-xl bg-slate-900 text-indigo-300 border border-slate-800 hover:bg-slate-800 text-xs font-semibold transition flex items-center space-x-2 light:bg-slate-200 light:text-slate-800">
-          <i class="fa-solid fa-plus"></i> <span>Add Subject</span>
-        </button>
-      </div>
-
-      <div id="attendanceGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-    </div>
-
-    <!-- SECTION 5: KANBAN WORKFLOW BOARD -->
-    <div class="glass-card p-6 rounded-2xl space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center space-x-2">
-          <span class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400"><i class="fa-solid fa-kanban"></i></span>
-          <div>
-            <h3 class="font-bold text-lg text-slate-100 light:text-slate-900">Assignment & Task Kanban Board</h3>
-            <p class="text-xs text-slate-400">Manage course assignments, practicals, and deadlines.</p>
-          </div>
-        </div>
-
-        <button onclick="addNewTaskPrompt()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold text-xs hover:bg-indigo-500 transition shadow-lg shadow-indigo-600/20 flex items-center space-x-2">
-          <i class="fa-solid fa-plus"></i> <span>New Task</span>
-        </button>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-slate-900/60 rounded-xl p-4 border border-slate-800/80 light:bg-slate-100 light:border-slate-200">
-          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800 light:border-slate-200">
-            <span class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center"><i class="fa-solid fa-circle text-[8px] mr-2"></i> To Do</span>
-            <span id="count-todo" class="text-xs font-mono-code px-2 py-0.5 rounded bg-slate-800 text-slate-300">0</span>
-          </div>
-          <div id="col-todo" class="space-y-3 min-h-[160px]"></div>
-        </div>
-
-        <div class="bg-slate-900/60 rounded-xl p-4 border border-slate-800/80 light:bg-slate-100 light:border-slate-200">
-          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800 light:border-slate-200">
-            <span class="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center"><i class="fa-solid fa-circle text-[8px] mr-2"></i> In Progress</span>
-            <span id="count-progress" class="text-xs font-mono-code px-2 py-0.5 rounded bg-slate-800 text-slate-300">0</span>
-          </div>
-          <div id="col-progress" class="space-y-3 min-h-[160px]"></div>
-        </div>
-
-        <div class="bg-slate-900/60 rounded-xl p-4 border border-slate-800/80 light:bg-slate-100 light:border-slate-200">
-          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800 light:border-slate-200">
-            <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center"><i class="fa-solid fa-circle text-[8px] mr-2"></i> Submitted</span>
-            <span id="count-done" class="text-xs font-mono-code px-2 py-0.5 rounded bg-slate-800 text-slate-300">0</span>
-          </div>
-          <div id="col-done" class="space-y-3 min-h-[160px]"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 6: TARGET CGPA PREDICTOR -->
-    <div class="glass-card p-6 rounded-2xl space-y-6">
-      <div class="flex items-center space-x-2">
-        <span class="p-2 rounded-lg bg-violet-500/10 text-violet-400"><i class="fa-solid fa-calculator"></i></span>
-        <div>
-          <h3 class="font-bold text-lg text-slate-100 light:text-slate-900">Target CGPA Predictor & Goal Planner</h3>
-          <p class="text-xs text-slate-400">Calculate exact required SGPA for future semesters.</p>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="space-y-4 bg-slate-900/50 p-4 rounded-xl border border-slate-800 light:bg-slate-100 light:border-slate-200">
-          <div>
-            <label class="text-xs font-semibold text-slate-300 light:text-slate-700 block mb-1">Current Cumulative CGPA</label>
-            <input type="number" id="inputCurrentCGPA" step="0.01" value="7.80" min="0" max="10" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 light:bg-white light:border-slate-300 light:text-slate-900">
-          </div>
-
-          <div>
-            <label class="text-xs font-semibold text-slate-300 light:text-slate-700 block mb-1">Completed Semesters</label>
-            <input type="number" id="inputCompletedSems" value="2" min="1" max="7" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 light:bg-white light:border-slate-300 light:text-slate-900">
-          </div>
-
-          <div>
-            <label class="text-xs font-semibold text-slate-300 light:text-slate-700 block mb-1">Target Graduation CGPA</label>
-            <input type="number" id="inputTargetCGPA" step="0.01" value="8.50" min="0" max="10" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 light:bg-white light:border-slate-300 light:text-slate-900">
-          </div>
-
-          <button onclick="calculateRequiredCGPA()" class="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shadow-md shadow-indigo-600/20">
-            Calculate Target SGPA
-          </button>
-        </div>
-
-        <div class="lg:col-span-2 bg-gradient-to-br from-indigo-950/80 to-slate-900 p-6 rounded-xl border border-indigo-500/30 flex flex-col justify-between light:from-indigo-50 light:to-white light:border-indigo-200">
-          <div>
-            <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Prediction Trajectory</span>
-            <h4 id="cgpaTargetHeading" class="text-3xl font-extrabold text-slate-100 mt-2 light:text-slate-900">SGPA 8.85 Needed</h4>
-            <p id="cgpaTargetDesc" class="text-xs text-slate-300 mt-2 leading-relaxed light:text-slate-700">
-              To reach your target CGPA of <strong class="text-indigo-400">8.50</strong> by Semester 6, you must maintain an average SGPA of <strong class="text-emerald-400">8.85</strong> across your remaining 4 semesters.
-            </p>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-slate-800 light:border-slate-200">
-            <div>
-              <span class="text-[11px] text-slate-400 block">Total Degree Semesters</span>
-              <span class="font-bold text-sm text-slate-200 light:text-slate-800">6 Semesters (B.Sc CS)</span>
-            </div>
-            <div>
-              <span class="text-[11px] text-slate-400 block">Feasibility Rating</span>
-              <span id="feasibilityBadge" class="inline-block text-xs font-bold text-emerald-400"><i class="fa-solid fa-circle-check"></i> Achievable Target</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 7: FLASHCARD REVISION DECK -->
-    <div class="glass-card p-6 rounded-2xl space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center space-x-2">
-          <span class="p-2 rounded-lg bg-amber-500/10 text-amber-400"><i class="fa-solid fa-layer-group"></i></span>
-          <div>
-            <h3 class="font-bold text-lg text-slate-100 light:text-slate-900">Flashcard Study Deck</h3>
-            <p class="text-xs text-slate-400">Flip cards for quick definitions, syntax, and exam questions.</p>
-          </div>
-        </div>
-
-        <div class="flex items-center space-x-2">
-          <select id="flashcardCategoryFilter" onchange="filterFlashcards()" class="bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-200 px-3 py-2 focus:outline-none light:bg-slate-100 light:text-slate-800">
-            <option value="ALL">All Subjects</option>
-            <option value="Data Structures">Data Structures</option>
-            <option value="Python">Python</option>
-            <option value="Web Tech">Web Tech</option>
-          </select>
-          <button onclick="addFlashcardPrompt()" class="px-3 py-2 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800 text-xs font-semibold transition light:bg-slate-200 light:text-slate-800">
-            <i class="fa-solid fa-plus"></i>
-          </button>
-        </div>
-      </div>
-
-      <div id="flashcardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
-    </div>
-
-    <!-- SECTION 8: PYQ & NOTES LIBRARY -->
-    <div class="glass-card p-6 rounded-2xl space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center space-x-2">
-          <span class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400"><i class="fa-solid fa-book-bookmark"></i></span>
-          <div>
-            <h3 class="font-bold text-lg text-slate-100 light:text-slate-900">PYQ & Notes Library Hub</h3>
-            <p class="text-xs text-slate-400">Semester question papers, lab manuals, and PDFs.</p>
-          </div>
-        </div>
-
-        <div class="flex flex-wrap gap-2">
-          <button onclick="filterResources('ALL')" class="res-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white">All</button>
-          <button onclick="filterResources('Notes')" class="res-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-300 hover:bg-slate-800 light:bg-slate-200 light:text-slate-800">Notes</button>
-          <button onclick="filterResources('PYQ')" class="res-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-300 hover:bg-slate-800 light:bg-slate-200 light:text-slate-800">PYQs</button>
-          <button onclick="filterResources('Lab')" class="res-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-300 hover:bg-slate-800 light:bg-slate-200 light:text-slate-800">Lab Manuals</button>
-        </div>
-      </div>
-
-      <div id="resourcesGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-    </div>
-
-    <!-- SECTION 9: AUTO-SAVING SCRATCHPAD -->
-    <div class="glass-card p-6 rounded-2xl space-y-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <span class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400"><i class="fa-solid fa-pen-to-square"></i></span>
-          <h3 class="font-bold text-lg text-slate-100 light:text-slate-900">Lecture Scratchpad & Code Snippets</h3>
-        </div>
-        <span id="scratchSaveStatus" class="text-xs text-slate-400"><i class="fa-solid fa-floppy-disk"></i> Auto-saved locally</span>
-      </div>
-
-      <textarea id="scratchpadArea" oninput="saveScratchpad()" placeholder="Type lecture notes, quick snippets, or exam revision reminders here..." class="w-full h-36 bg-slate-900/80 border border-slate-800 rounded-xl p-4 text-xs font-mono-code text-slate-200 focus:outline-none focus:border-indigo-500 light:bg-slate-100 light:border-slate-200 light:text-slate-900 leading-relaxed"></textarea>
-    </div>
-
-  </main>
-
-  <!-- COMMAND PALETTE MODAL (Ctrl + K) -->
-  <div id="commandPalette" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="glass-card w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl border border-slate-700">
-      <div class="p-4 border-b border-slate-800 flex items-center space-x-3">
-        <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
-        <input type="text" id="cmdInput" placeholder="Type a command or quick search..." class="w-full bg-transparent text-sm text-slate-100 focus:outline-none light:text-slate-900">
-        <kbd onclick="toggleCommandPalette()" class="cursor-pointer text-xs font-mono-code px-2 py-1 rounded bg-slate-800 text-slate-400 hover:text-white">ESC</kbd>
-      </div>
-      <div id="cmdList" class="p-2 max-h-64 overflow-y-auto space-y-1">
-        <button onclick="execCmd('timer')" class="w-full text-left px-3 py-2.5 rounded-lg hover:bg-indigo-600/20 hover:text-indigo-300 text-xs text-slate-300 flex items-center justify-between transition">
-          <span><i class="fa-solid fa-stopwatch mr-2 text-indigo-400"></i> Focus Sprint Timer</span>
-          <span class="text-[10px] text-slate-500">Shortcut</span>
-        </button>
-        <button onclick="execCmd('attendance')" class="w-full text-left px-3 py-2.5 rounded-lg hover:bg-indigo-600/20 hover:text-indigo-300 text-xs text-slate-300 flex items-center justify-between transition">
-          <span><i class="fa-solid fa-clipboard-user mr-2 text-emerald-400"></i> Attendance Tracker</span>
-          <span class="text-[10px] text-slate-500">Shortcut</span>
-        </button>
-        <button onclick="execCmd('flashcards')" class="w-full text-left px-3 py-2.5 rounded-lg hover:bg-indigo-600/20 hover:text-indigo-300 text-xs text-slate-300 flex items-center justify-between transition">
-          <span><i class="fa-solid fa-layer-group mr-2 text-amber-400"></i> Flashcard Revision Deck</span>
-          <span class="text-[10px] text-slate-500">Shortcut</span>
-        </button>
-        <button onclick="execCmd('theme')" class="w-full text-left px-3 py-2.5 rounded-lg hover:bg-indigo-600/20 hover:text-indigo-300 text-xs text-slate-300 flex items-center justify-between transition">
-          <span><i class="fa-solid fa-circle-half-stroke mr-2 text-violet-400"></i> Toggle Dark/Light Mode</span>
-          <span class="text-[10px] text-slate-500">Action</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- JAVASCRIPT APPLICATION CORE -->
-  <script>
-    /* 1. STATE & LOCALSTORAGE persistence */
-    const defaultSubjects = [
-      { id: 'sub-1', name: 'Data Structures & Algo', attended: 28, total: 32 },
-      { id: 'sub-2', name: 'Python Programming', attended: 22, total: 24 },
-      { id: 'sub-3', name: 'Database Systems', attended: 18, total: 26 },
-      { id: 'sub-4', name: 'Statistics & Math', attended: 19, total: 25 },
-    ];
-
-    const defaultTasks = [
-      { id: 't-1', title: 'Binary Search Tree Lab Assignment', subject: 'Data Structures', status: 'todo', priority: 'High' },
-      { id: 't-2', title: 'Flask API Documentation', subject: 'Python', status: 'progress', priority: 'Medium' },
-      { id: 't-3', title: 'SQL Joins Practice Set', subject: 'Database Systems', status: 'done', priority: 'Low' },
-    ];
-
-    const defaultFlashcards = [
-      { id: 'fc-1', category: 'Data Structures', question: 'What is the time complexity of Binary Search?', answer: 'O(log n) in average and worst cases for sorted arrays.' },
-      { id: 'fc-2', category: 'Python', question: 'Difference between List and Tuple in Python?', answer: 'Lists are mutable [ ], Tuples are immutable ( ).' },
-      { id: 'fc-3', category: 'Web Tech', question: 'What does CSS box-sizing: border-box do?', answer: 'Includes padding and border in element total width/height.' },
-    ];
-
-    const defaultResources = [
-      { id: 'r-1', title: 'Data Structures Complete Lecture Notes', sem: 'Sem 3', type: 'Notes', subject: 'DSA', link: '#' },
-      { id: 'r-2', title: '2025 End-Sem Statistics Question Paper', sem: 'Sem 2', type: 'PYQ', subject: 'Stats', link: '#' },
-      { id: 'r-3', title: 'Python Flask Web Dev Lab Manual', sem: 'Sem 3', type: 'Lab', subject: 'Python', link: '#' },
-    ];
-
-    let state = {
-      subjects: JSON.parse(localStorage.getItem('sh_subjects')) || defaultSubjects,
-      tasks: JSON.parse(localStorage.getItem('sh_tasks')) || defaultTasks,
-      flashcards: JSON.parse(localStorage.getItem('sh_flashcards')) || defaultFlashcards,
-      resources: JSON.parse(localStorage.getItem('sh_resources')) || defaultResources,
-      streak: parseInt(localStorage.getItem('sh_streak')) || 0,
-      scratchpad: localStorage.getItem('sh_scratchpad') || '',
-    };
-
-    function saveState() {
-      localStorage.setItem('sh_subjects', JSON.stringify(state.subjects));
-      localStorage.setItem('sh_tasks', JSON.stringify(state.tasks));
-      localStorage.setItem('sh_flashcards', JSON.stringify(state.flashcards));
-      localStorage.setItem('sh_resources', JSON.stringify(state.resources));
-      localStorage.setItem('sh_streak', state.streak);
-      renderAll();
-    }
-
-    /* 2. THEME CONTROLLER */
-    function toggleTheme() {
-      const html = document.documentElement;
-      const icon = document.getElementById('themeIcon');
-      if (html.classList.contains('dark')) {
-        html.classList.remove('dark');
-        html.classList.add('light');
-        icon.className = 'fa-solid fa-sun text-amber-500';
-      } else {
-        html.classList.remove('light');
-        html.classList.add('dark');
-        icon.className = 'fa-solid fa-moon text-indigo-400';
-      }
-    }
-
-    /* 3. CHART.JS VISUAL ANALYTICS */
-    let focusChartInstance = null;
-    let cgpaChartInstance = null;
-
-    function initCharts() {
-      const ctxFocus = document.getElementById('focusChart').getContext('2d');
-      focusChartInstance = new Chart(ctxFocus, {
-        type: 'bar',
-        data: {
-          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-          datasets: [{
-            label: 'Study Hours',
-            data: [4.5, 6.0, 5.2, 7.1, 4.0, 5.5, 2.2],
-            backgroundColor: 'rgba(99, 102, 241, 0.6)',
-            borderColor: '#6366f1',
-            borderWidth: 2,
-            borderRadius: 8,
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
-          }
-        }
-      });
-
-      const ctxCGPA = document.getElementById('cgpaChart').getContext('2d');
-      cgpaChartInstance = new Chart(ctxCGPA, {
-        type: 'line',
-        data: {
-          labels: ['Sem 1', 'Sem 2', 'Sem 3 (Est)', 'Sem 4 (Target)', 'Sem 5 (Target)', 'Sem 6 (Target)'],
-          datasets: [{
-            label: 'CGPA',
-            data: [7.60, 8.00, 8.25, 8.50, 8.65, 8.80],
-            borderColor: '#8b5cf6',
-            backgroundColor: 'rgba(139, 92, 246, 0.1)',
-            fill: true,
-            tension: 0.4,
-            pointRadius: 4,
-            pointBackgroundColor: '#8b5cf6',
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-            y: { min: 6, max: 10, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
-          }
-        }
-      });
-    }
-
-    /* 4. AI ASSISTANT SIMULATOR */
-    function handleAIPrompt() {
-      const input = document.getElementById('aiPromptInput');
-      const text = input.value.trim();
-      const box = document.getElementById('aiResponseBox');
-
-      if (!text) return;
-
-      box.innerHTML = `<span class="text-indigo-400 animate-pulse"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Analyzing study request...</span>`;
-
-      setTimeout(() => {
-        if (text.toLowerCase().includes('binary search')) {
-          box.innerHTML = `<strong class="text-emerald-400">AI Response:</strong> Binary Search works on sorted arrays. It repeatedly divides the search interval in half. Time Complexity is O(log n).`;
-        } else if (text.toLowerCase().includes('quiz')) {
-          box.innerHTML = `<strong class="text-amber-400">AI Quiz:</strong> Q1: What is the stack data structure principle? A) FIFO B) LIFO C) Random. (Answer: B - LIFO)`;
-        } else {
-          box.innerHTML = `<strong class="text-indigo-400">AI Explanation:</strong> "${text}" - In computer science, this topic focuses on algorithmic efficiency, modular design, and robust data structures.`;
-        }
-        input.value = '';
-      }, 1000);
-    }
-
-    /* 5. FOCUS TIMER & AMBIENT AUDIO ENGINE */
-    let timerInterval = null;
-    let timerSeconds = 25 * 60;
-    let timerTotal = 25 * 60;
-    let isTimerRunning = false;
-
-    function setTimerPreset(minutes, label) {
-      clearInterval(timerInterval);
-      isTimerRunning = false;
-      timerSeconds = minutes * 60;
-      timerTotal = minutes * 60;
-      document.getElementById('timerStatusLabel').innerText = label;
-      document.getElementById('startTimerBtn').innerHTML = `<i class="fa-solid fa-play text-xs"></i> <span>Start Session</span>`;
-      updateTimerDisplay();
-    }
-
-    function toggleTimer() {
-      const btn = document.getElementById('startTimerBtn');
-      if (isTimerRunning) {
-        clearInterval(timerInterval);
-        isTimerRunning = false;
-        btn.innerHTML = `<i class="fa-solid fa-play text-xs"></i> <span>Resume</span>`;
-      } else {
-        isTimerRunning = true;
-        btn.innerHTML = `<i class="fa-solid fa-pause text-xs"></i> <span>Pause</span>`;
-        timerInterval = setInterval(() => {
-          if (timerSeconds > 0) {
-            timerSeconds--;
-            updateTimerDisplay();
-          } else {
-            clearInterval(timerInterval);
-            isTimerRunning = false;
-            state.streak++;
-            saveState();
-            alert('Sprint Completed! Take a short break.');
-            setTimerPreset(5, 'Short Break');
-          }
-        }, 1000);
-      }
-    }
-
-    function resetTimer() {
-      setTimerPreset(25, 'Focus Session');
-    }
-
-    function updateTimerDisplay() {
-      const mins = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
-      const secs = (timerSeconds % 60).toString().padStart(2, '0');
-      document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
-      
-      const progressRing = document.getElementById('timerProgress');
-      const circumference = 263.89;
-      const offset = circumference - (timerSeconds / timerTotal) * circumference;
-      progressRing.style.strokeDashoffset = offset;
-    }
-
-    // Audio Synthesizer
-    let audioCtx = null;
-    let activeAmbientNode = null;
-    let activeAmbientType = null;
-    let masterGain = null;
-
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        masterGain = audioCtx.createGain();
-        masterGain.gain.value = 0.5;
-        masterGain.connect(audioCtx.destination);
-      }
-    }
-
-    function toggleAmbient(type) {
-      initAudio();
-      const btn = document.getElementById(`soundBtn-${type}`);
-
-      if (activeAmbientType === type) {
-        stopAmbient();
-        return;
-      }
-
-      stopAmbient();
-      activeAmbientType = type;
-      btn.innerText = 'Stop';
-      btn.className = 'px-3 py-1 text-xs rounded-lg bg-indigo-600 text-white font-bold';
-
-      const bufferSize = audioCtx.sampleRate * 2;
-      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-      const data = buffer.getChannelData(0);
-
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
-      }
-
-      const noise = audioCtx.createBufferSource();
-      noise.buffer = buffer;
-      noise.loop = true;
-
-      const filter = audioCtx.createBiquadFilter();
-      if (type === 'rain') { filter.type = 'lowpass'; filter.frequency.value = 1000; }
-      else if (type === 'white') { filter.type = 'bandpass'; filter.frequency.value = 3000; }
-      else if (type === 'ocean') { filter.type = 'lowpass'; filter.frequency.value = 400; }
-
-      noise.connect(filter);
-      filter.connect(masterGain);
-      noise.start();
-      activeAmbientNode = noise;
-    }
-
-    function stopAmbient() {
-      if (activeAmbientNode) {
-        activeAmbientNode.stop();
-        activeAmbientNode = null;
-      }
-      if (activeAmbientType) {
-        const btn = document.getElementById(`soundBtn-${activeAmbientType}`);
-        if (btn) {
-          btn.innerText = 'Play';
-          btn.className = 'px-3 py-1 text-xs rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-indigo-600 hover:text-white transition';
-        }
-        activeAmbientType = null;
-      }
-    }
-
-    function setAmbientVolume(val) {
-      if (masterGain) masterGain.gain.value = val;
-    }
-
-    /* 6. ATTENDANCE ENGINE */
-    function renderAttendance() {
-      const grid = document.getElementById('attendanceGrid');
-      grid.innerHTML = '';
-      let grandAttended = 0;
-      let grandTotal = 0;
-
-      state.subjects.forEach(sub => {
-        grandAttended += sub.attended;
-        grandTotal += sub.total;
-        const pct = sub.total > 0 ? ((sub.attended / sub.total) * 100).toFixed(1) : 0;
-        const isSafe = pct >= 75;
-
-        let advice = '';
-        if (isSafe) {
-          const maxBunk = Math.floor((sub.attended - 0.75 * sub.total) / 0.75);
-          advice = maxBunk > 0 ? `Can bunk <strong class="text-emerald-400">${maxBunk}</strong> class(es)` : 'Borderline 75%';
-        } else {
-          const reqAttend = Math.ceil((0.75 * sub.total - sub.attended) / 0.25);
-          advice = `Must attend next <strong class="text-rose-400">${reqAttend}</strong> class(es)`;
-        }
-
-        grid.innerHTML += `
-          <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 light:bg-slate-100 light:border-slate-200 space-y-3">
-            <div class="flex items-center justify-between">
-              <h4 class="font-semibold text-sm text-slate-200 light:text-slate-800">${sub.name}</h4>
-              <span class="text-xs px-2 py-0.5 rounded-full ${isSafe ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">
-                ${pct}%
-              </span>
-            </div>
-            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden light:bg-slate-200">
-              <div class="h-full ${isSafe ? 'bg-emerald-500' : 'bg-rose-500'}" style="width: ${Math.min(pct, 100)}%"></div>
-            </div>
-            <div class="flex items-center justify-between text-xs text-slate-400">
-              <span>${sub.attended} / ${sub.total} Classes</span>
-              <div class="space-x-1">
-                <button onclick="updateAtt('${sub.id}', 1, 1)" class="px-2 py-0.5 rounded bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600 hover:text-white transition">+Present</button>
-                <button onclick="updateAtt('${sub.id}', 0, 1)" class="px-2 py-0.5 rounded bg-rose-600/20 text-rose-300 hover:bg-rose-600 hover:text-white transition">+Absent</button>
-              </div>
-            </div>
-            <div class="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 light:border-slate-200">
-              <i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i> ${advice}
-            </div>
-          </div>
-        `;
-      });
-
-      const overallPct = grandTotal > 0 ? ((grandAttended / grandTotal) * 100).toFixed(1) : 0;
-      document.getElementById('heroAttendance').innerText = `${overallPct}%`;
-    }
-
-    function updateAtt(id, attInc, totInc) {
-      const sub = state.subjects.find(s => s.id === id);
-      if (sub) { sub.attended += attInc; sub.total += totInc; saveState(); }
-    }
-
-    function addSubjectPrompt() {
-      const name = prompt('Enter Subject Name:');
-      if (name) { state.subjects.push({ id: 'sub-' + Date.now(), name: name, attended: 0, total: 0 }); saveState(); }
-    }
-
-    /* 7. KANBAN TASK BOARD */
-    function renderTasks() {
-      const colTodo = document.getElementById('col-todo');
-      const colProgress = document.getElementById('col-progress');
-      const colDone = document.getElementById('col-done');
-      colTodo.innerHTML = ''; colProgress.innerHTML = ''; colDone.innerHTML = '';
-
-      let counts = { todo: 0, progress: 0, done: 0 };
-
-      state.tasks.forEach(t => {
-        counts[t.status]++;
-        const cardHtml = `
-          <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2 light:bg-white light:border-slate-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">${t.subject}</span>
-              <button onclick="deleteTask('${t.id}')" class="text-slate-500 hover:text-rose-400 text-xs"><i class="fa-solid fa-trash"></i></button>
-            </div>
-            <h5 class="text-xs font-semibold text-slate-200 light:text-slate-800">${t.title}</h5>
-            <div class="flex items-center justify-between pt-1 text-[10px] text-slate-400">
-              <span>Priority: <strong class="text-amber-400">${t.priority}</strong></span>
-              <div class="space-x-1">
-                ${t.status !== 'todo' ? `<button onclick="moveTask('${t.id}', 'todo')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700">← To Do</button>` : ''}
-                ${t.status !== 'progress' ? `<button onclick="moveTask('${t.id}', 'progress')" class="px-1.5 py-0.5 rounded bg-indigo-600/20 text-indigo-300">Progress</button>` : ''}
-                ${t.status !== 'done' ? `<button onclick="moveTask('${t.id}', 'done')" class="px-1.5 py-0.5 rounded bg-emerald-600/20 text-emerald-300">Done ✓</button>` : ''}
-              </div>
-            </div>
-          </div>
-        `;
-        if (t.status === 'todo') colTodo.innerHTML += cardHtml;
-        else if (t.status === 'progress') colProgress.innerHTML += cardHtml;
-        else if (t.status === 'done') colDone.innerHTML += cardHtml;
-      });
-
-      document.getElementById('count-todo').innerText = counts.todo;
-      document.getElementById('count-progress').innerText = counts.progress;
-      document.getElementById('count-done').innerText = counts.done;
-      document.getElementById('heroTasksCount').innerText = `${counts.todo + counts.progress} Active`;
-    }
-
-    function moveTask(id, newStatus) {
-      const task = state.tasks.find(t => t.id === id);
-      if (task) { task.status = newStatus; saveState(); }
-    }
-
-    function deleteTask(id) {
-      state.tasks = state.tasks.filter(t => t.id !== id);
-      saveState();
-    }
-
-    function addNewTaskPrompt() {
-      const title = prompt('Enter Task Title:');
-      if (title) {
-        const subject = prompt('Enter Subject:', 'Computer Science');
-        state.tasks.push({ id: 't-' + Date.now(), title: title, subject: subject || 'General', status: 'todo', priority: 'Medium' });
-        saveState();
-      }
-    }
-
-    /* 8. TARGET CGPA PREDICTOR */
-    function calculateRequiredCGPA() {
-      const currentCGPA = parseFloat(document.getElementById('inputCurrentCGPA').value) || 0;
-      const completedSems = parseInt(document.getElementById('inputCompletedSems').value) || 1;
-      const targetCGPA = parseFloat(document.getElementById('inputTargetCGPA').value) || 0;
-
-      const totalSems = 6;
-      const remainingSems = totalSems - completedSems;
-      if (remainingSems <= 0) return;
-
-      const requiredTotalPoints = targetCGPA * totalSems;
-      const currentPoints = currentCGPA * completedSems;
-      const neededSGPA = (requiredTotalPoints - currentPoints) / remainingSems;
-
-      const heading = document.getElementById('cgpaTargetHeading');
-      const desc = document.getElementById('cgpaTargetDesc');
-      const badge = document.getElementById('feasibilityBadge');
-
-      if (neededSGPA > 10.0) {
-        heading.innerText = `SGPA ${neededSGPA.toFixed(2)} Required`;
-        heading.className = "text-3xl font-extrabold text-rose-400 mt-2";
-        desc.innerHTML = `Target CGPA of <strong class="text-indigo-400">${targetCGPA.toFixed(2)}</strong> is mathematically unattainable as required SGPA exceeds 10.0 max scale.`;
-        badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-400"></i> Unrealistic Target`;
-      } else {
-        heading.innerText = `SGPA ${neededSGPA.toFixed(2)} Needed`;
-        heading.className = "text-3xl font-extrabold text-slate-100 mt-2 light:text-slate-900";
-        desc.innerHTML = `To achieve a target CGPA of <strong class="text-indigo-400">${targetCGPA.toFixed(2)}</strong> by Semester 6, maintain an average SGPA of <strong class="text-emerald-400">${neededSGPA.toFixed(2)}</strong> across remaining ${remainingSems} semesters.`;
-        badge.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> Achievable Target`;
-      }
-      document.getElementById('heroCGPA').innerText = `${targetCGPA.toFixed(2)} / 10`;
-    }
-
-    /* 9. FLASHCARD REVISION SYSTEM */
-    function renderFlashcards(filter = 'ALL') {
-      const grid = document.getElementById('flashcardsGrid');
-      grid.innerHTML = '';
-      const filtered = filter === 'ALL' ? state.flashcards : state.flashcards.filter(f => f.category === filter);
-
-      filtered.forEach(fc => {
-        grid.innerHTML += `
-          <div onclick="this.classList.toggle('rotate-y-180')" class="group perspective-1000 h-44 cursor-pointer">
-            <div class="relative w-full h-full duration-500 transform-style-3d transition-transform group-[.rotate-y-180]:rotate-y-180">
-              <div class="absolute inset-0 backface-hidden glass-card p-5 rounded-xl flex flex-col justify-between border border-slate-800 light:bg-white light:border-slate-200">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400">${fc.category}</span>
-                <p class="text-xs font-semibold text-slate-200 light:text-slate-800">${fc.question}</p>
-                <span class="text-[10px] text-slate-500 text-right"><i class="fa-solid fa-rotate mr-1"></i> Flip</span>
-              </div>
-              <div class="absolute inset-0 backface-hidden rotate-y-180 bg-indigo-950/90 border border-indigo-500/30 p-5 rounded-xl flex flex-col justify-between text-slate-100 light:bg-indigo-600 light:text-white">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-300">Answer</span>
-                <p class="text-xs font-medium">${fc.answer}</p>
-                <span class="text-[10px] text-indigo-300 text-right">Flip Back</span>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    function filterFlashcards() {
-      renderFlashcards(document.getElementById('flashcardCategoryFilter').value);
-    }
-
-    function addFlashcardPrompt() {
-      const cat = prompt('Enter Category:', 'General');
-      const q = prompt('Enter Question:');
-      const a = prompt('Enter Answer:');
-      if (q && a) { state.flashcards.push({ id: 'fc-' + Date.now(), category: cat || 'General', question: q, answer: a }); saveState(); }
-    }
-
-    /* 10. PYQ & NOTES LIBRARY PORTAL */
-    function renderResources(typeFilter = 'ALL') {
-      const grid = document.getElementById('resourcesGrid');
-      grid.innerHTML = '';
-      const filtered = typeFilter === 'ALL' ? state.resources : state.resources.filter(r => r.type === typeFilter);
-
-      filtered.forEach(res => {
-        grid.innerHTML += `
-          <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 light:bg-slate-100 light:border-slate-200 flex flex-col justify-between space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-indigo-400 border border-slate-700">${res.sem} • ${res.type}</span>
-              <span class="text-[10px] text-slate-400">${res.subject}</span>
-            </div>
-            <h5 class="text-xs font-bold text-slate-200 light:text-slate-800">${res.title}</h5>
-            <a href="${res.link}" target="_blank" class="w-full py-1.5 rounded-lg bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600 hover:text-white text-xs font-semibold text-center transition block">
-              <i class="fa-solid fa-download mr-1"></i> Download PDF
-            </a>
-          </div>
-        `;
-      });
-    }
-
-    function filterResources(type) { renderResources(type); }
-
-    /* 11. SCRATCHPAD, JSON EXPORT & COMMAND PALETTE */
-    function saveScratchpad() {
-      state.scratchpad = document.getElementById('scratchpadArea').value;
-      localStorage.setItem('sh_scratchpad', state.scratchpad);
-      document.getElementById('scratchSaveStatus').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> Saved`;
-      setTimeout(() => { document.getElementById('scratchSaveStatus').innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Auto-saved locally`; }, 2000);
-    }
-
-    function exportDataJSON() {
-      const jsonStr = JSON.stringify(state, null, 2);
-      const blob = new Blob([jsonStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `StudentHub_Backup_${new Date().toISOString().slice(0, 10)}.json`;
-      a.click();
-    }
-
-    function importDataJSON(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          const imported = JSON.parse(evt.target.result);
-          state = { ...state, ...imported };
-          saveState();
-          alert('State Backup Restored Successfully!');
-        } catch (err) {
-          alert('Invalid JSON Backup file format!');
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    function toggleCommandPalette() {
-      const modal = document.getElementById('commandPalette');
-      modal.classList.toggle('hidden');
-      modal.classList.toggle('flex');
-    }
-
-    function execCmd(action) {
-      toggleCommandPalette();
-      if (action === 'timer') window.scrollTo({ top: 0, behavior: 'smooth' });
-      else if (action === 'attendance') document.getElementById('attendanceGrid').scrollIntoView({ behavior: 'smooth' });
-      else if (action === 'flashcards') document.getElementById('flashcardsGrid').scrollIntoView({ behavior: 'smooth' });
-      else if (action === 'theme') toggleTheme();
-    }
-
-    document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); toggleCommandPalette(); }
-    });
-
-    /* MASTER RENDER INITIALIZATION */
-    function renderAll() {
-      renderAttendance();
-      renderTasks();
-      renderFlashcards();
-      renderResources();
-      document.getElementById('streakDisplay').innerHTML = `<i class="fa-solid fa-fire mr-1"></i> ${state.streak} Streaks Today`;
-      document.getElementById('scratchpadArea').value = state.scratchpad;
-    }
-
-    window.onload = function() {
-      renderAll();
-      initCharts();
-      calculateRequiredCGPA();
-    };
-  </script>
+    <script src="js/main.js"></script>
 </body>
 </html>

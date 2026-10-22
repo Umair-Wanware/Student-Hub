@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", () => {
     const API_BASE = "/api";
     const pageContent = document.getElementById("page-content");
@@ -663,43 +662,4 @@ document.addEventListener("DOMContentLoaded", () => {
         updateChrome(currentPage());
         renderPage(currentPage());
     }).catch(() => window.location.replace("/login.html"));
-});
-const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
-const sidebarCloseBtn = document.getElementById("sidebar-close-btn");
-const sidebar = document.querySelector(".sidebar");
-const overlay = document.getElementById("sidebar-overlay");
-const navLinks = document.querySelectorAll(".nav-link");
-
-function openSidebar() {
-    sidebar.classList.add("mobile-open");
-    overlay.classList.add("active");
-}
-
-function closeSidebar() {
-    sidebar.classList.remove("mobile-open");
-    overlay.classList.remove("active");
-}
-
-// Hamburger icon click -> Open
-if (mobileMenuToggle) {
-    mobileMenuToggle.addEventListener("click", openSidebar);
-}
-
-// Close (X) button click -> Close
-if (sidebarCloseBtn) {
-    sidebarCloseBtn.addEventListener("click", closeSidebar);
-}
-
-// Outside Dark Overlay click -> Close
-if (overlay) {
-    overlay.addEventListener("click", closeSidebar);
-}
-
-// Any nav link click on mobile -> Auto Close
-navLinks.forEach(link => {
-    link.addEventListener("click", () => {
-        if (window.innerWidth <= 768) {
-            closeSidebar();
-        }
-    });
 });

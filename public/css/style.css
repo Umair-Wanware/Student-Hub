@@ -674,46 +674,16 @@ a {
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* Mobile Hamburger Toggle Button - Desktop par hide rahega */
-#mobile-menu-toggle {
-    display: none;
-}
-
 @media (max-width: 768px) {
-    /* Show mobile menu button */
-    #mobile-menu-toggle {
-        display: grid;
-        place-items: center;
-    }
-
-    /* Sidebar as a sliding drawer on mobile */
-    .sidebar {
-        width: 260px;
-        transform: translateX(-100%);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
-        z-index: 100;
-    }
-
-    /* Jab mobile menu open hoga */
-    .sidebar.mobile-open {
-        transform: translateX(0);
-    }
-
-    /* Main content margin mobile par 0 kar dein taaki full width mile */
-    .main-content {
-        margin-left: 0;
-        padding: 20px 16px;
-    }
-
-    /* Profile text hide on very small screens */
-    .profile-summary > div:last-child {
-        display: none;
-    }
-
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
+    .sidebar { width: 70px; padding: 20px 10px; }
+    .brand > div:last-child, .nav-label, .nav-link span, .sidebar-bottom { display: none; }
+    .nav-link { justify-content: center; }
+    .main-content { margin-left: 70px; padding: 20px 16px; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .task-item { align-items: flex-start; gap: 12px; }
+    .task-actions { flex-direction: column; align-items: flex-end; }
+    .note-form-grid { grid-template-columns: 1fr; }
+    .timer-controls { flex-wrap: wrap; justify-content: center; }
 }
 
 /* Account */
@@ -898,54 +868,4 @@ a {
     .auth-layout { padding-top: 20px; }
     .auth-panel { padding: 24px 20px; }
     .account-details { grid-template-columns: 1fr; }
-}
-/* Sidebar Close Button Style */
-#sidebar-close-btn {
-    display: none;
-    background: transparent;
-    border: none;
-    color: #94a3b8;
-    font-size: 20px;
-    margin-left: auto;
-    cursor: pointer;
-}
-
-#sidebar-close-btn:hover {
-    color: white;
-}
-
-/* Background Dark Overlay */
-#sidebar-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(4px);
-    z-index: 90;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-/* Mobile Screens Styling */
-@media (max-width: 768px) {
-    #sidebar-close-btn {
-        display: block; /* Mobile par close cross dikhega */
-    }
-
-    #sidebar-overlay.active {
-        opacity: 1;
-        pointer-events: auto; /* Active hone par click accept karega */
-    }
-}
-body, html {
-    overflow-x: hidden;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-.app-container {
-    max-width: 100vw;
-    min-width: 0;
-    overflow-x: hidden;
 }
