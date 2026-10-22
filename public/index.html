@@ -81,7 +81,7 @@
             <header class="topbar">
                 <div>
                     <p class="breadcrumb">Pages / Dashboard</p>
-                    <h1>Dashboard</h1>
+                    <h1 id="page-title">Dashboard</h1>
                 </div>
 
                 <div class="topbar-actions">
@@ -183,6 +183,55 @@
 
             </div>
 
+            <!-- Account / Change Password Template Section (Can be dynamically loaded or kept ready) -->
+            <template id="account-page-template">
+                <section class="content-card">
+                    <div class="section-header">
+                        <div>
+                            <h2>Change password</h2>
+                            <p>Use 12+ characters with upper and lowercase letters, a number, and a symbol.</p>
+                        </div>
+                    </div>
+
+                    <form id="change-password-form">
+                        <!-- Current Password -->
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label for="current-password" style="display: block; margin-bottom: 6px;">Current password</label>
+                            <div class="password-container" style="position: relative; display: flex; align-items: center;">
+                                <input type="password" id="current-password" class="form-control" required style="width: 100%; padding: 10px 40px 10px 12px;">
+                                <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('current-password', this)" style="position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: #94a3b8;">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- New Password -->
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label for="new-password" style="display: block; margin-bottom: 6px;">New password</label>
+                            <div class="password-container" style="position: relative; display: flex; align-items: center;">
+                                <input type="password" id="new-password" class="form-control" required style="width: 100%; padding: 10px 40px 10px 12px;">
+                                <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('new-password', this)" style="position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: #94a3b8;">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Confirm New Password -->
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label for="confirm-password" style="display: block; margin-bottom: 6px;">Confirm new password</label>
+                            <div class="password-container" style="position: relative; display: flex; align-items: center;">
+                                <input type="password" id="confirm-password" class="form-control" required style="width: 100%; padding: 10px 40px 10px 12px;">
+                                <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('confirm-password', this)" style="position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: #94a3b8;">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="primary-button">Change password</button>
+                    </form>
+                </section>
+            </template>
+
             <!-- Footer -->
             <footer class="footer">
                 <p>© 2026 StudySphere — Built for Students</p>
@@ -190,6 +239,40 @@
 
         </main>
     </div>
+
+    <!-- Password Visibility Toggle Script -->
+    <script>
+        function togglePasswordVisibility(fieldId, button) {
+            const inputField = document.getElementById(fieldId);
+            const icon = button.querySelector('i');
+            
+            if (inputField.type === "password") {
+                inputField.type = "text";
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                inputField.type = "password";
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+    <script>
+    function togglePasswordVisibility(fieldId, button) {
+        const inputField = document.getElementById(fieldId);
+        const icon = button.querySelector('i');
+        
+        if (inputField.type === "password") {
+            inputField.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            inputField.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+</script>
 
     <script src="js/main.js"></script>
 </body>

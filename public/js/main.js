@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const response = await fetch(`${API_BASE}${path}`, {
             ...options,
             method,
-            credentials: "same-origin",
+            credentials: "include",
             headers
         });
         const contentType = response.headers.get("content-type") || "";
@@ -560,59 +560,87 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) { renderError(error); }
     }
 
-    async function renderAccount() {
-        pageContent.innerHTML = `
-            <section class="welcome-section page-heading"><div><h2>Your account</h2><p>Manage your profile and sign-in details.</p></div></section>
-            <section class="content-card account-summary">
-                <div class="section-header"><div><h2>Profile details</h2><p>Your account information and access level.</p></div></div>
-                <dl class="account-details">
-                    <div><dt>Full name</dt><dd>${escapeHTML(currentUser.name)}</dd></div>
-                    <div><dt>Email address</dt><dd>${escapeHTML(currentUser.email)}</dd></div>
-                    <div><dt>Role</dt><dd>${escapeHTML(currentUser.role)}</dd></div>
-                    <div><dt>Created</dt><dd>${escapeHTML(formatDate(currentUser.createdAt))}</dd></div>
-                </dl>
-            </section>
-            <section class="content-card">
-                <div class="section-header"><div><h2>Update profile</h2><p>Change your name or email address.</p></div></div>
-                <form id="profile-form"><div class="form-grid">
-                    <label class="form-group">Full name<input class="form-control" name="name" maxlength="100" required value="${escapeHTML(currentUser.name)}"></label>
-                    <label class="form-group">Email address<input class="form-control" name="email" type="email" maxlength="150" required value="${escapeHTML(currentUser.email)}"></label>
-                </div><button class="primary-button" type="submit">Save profile</button></form>
-            </section>
-            <section class="content-card">
-                <div class="section-header"><div><h2>Change password</h2><p>Use 12+ characters with upper and lowercase letters, a number, and a symbol.</p></div></div>
-                <form id="password-form"><div class="form-grid">
-                    <label class="form-group">Current password<input class="form-control" name="currentPassword" type="password" autocomplete="current-password" required></label>
-                    <label class="form-group">New password<input class="form-control" name="newPassword" type="password" autocomplete="new-password" minlength="12" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,}" title="Use at least 12 characters with uppercase and lowercase letters, a number, and a symbol." required></label>
-                    <label class="form-group">Confirm new password<input class="form-control" name="confirmPassword" type="password" autocomplete="new-password" minlength="12" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,}" title="Use at least 12 characters with uppercase and lowercase letters, a number, and a symbol." required></label>
-                </div><button class="primary-button" type="submit">Change password</button></form>
-            </section>
-        `;
+   async function renderAccount() {
+    pageContent.innerHTML = `
+        <section class="content-card page-heading">
+            <div>
+                <h2>Your account</h2>
+                <p>Manage your profile and sign-in credentials.</p>
+            </div>
+        </section>
 
-        document.getElementById("profile-form").addEventListener("submit", async event => {
+        <section class="content-card account-summary">
+            <div class="section-header">
+                <div>
+                    <h2>Profile details</h2>
+                    <p>Your account information and access level.</p>
+                </div>
+            </div>
+            <dl class="account-details">
+                <div><dt>Full name</dt><dd>${escapeHTML(currentUser.name)}</dd></div>
+                <div><dt>Email address</dt><dd>${escapeHTML(currentUser.email)}</dd></div>
+                <div><dt>Role</dt><dd>${escapeHTML(currentUser.role)}</dd></div>
+                <div><dt>Created</dt><dd>${escapeHTML(formatDate(currentUser.createdAt))}</dd></div>
+            </dl>
+        </section>
+
+        <section class="content-card" style="margin-top: 20px;">
+            <div class="section-header">
+                <div>
+                    <h2>Change password</h2>
+                    <p>Use 12+ characters with upper and lowercase letters, a number, and a symbol.</p>
+                </div>
+            </div>
+
+            <form id="change-password-form">
+                <!-- Current Password -->
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="current-password" style="display: block; margin-bottom: 6px;">Current password</label>
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input type="password" id="current-password" class="form-control" required style="width: 100%; padding: 10px 40px 10px 12px;">
+                        <span class="toggle-pwd-btn" data-target="current-password" style="position: absolute; right: 12px; cursor: pointer; color: #94a3b8; padding: 5px; z-index: 10;">
+                            <i class="fa-solid fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- New Password -->
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="new-password" style="display: block; margin-bottom: 6px;">New password</label>
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input type="password" id="new-password" class="form-control" required style="width: 100%; padding: 10px 40px 10px 12px;">
+                        <span class="toggle-pwd-btn" data-target="new-password" style="position: absolute; right: 12px; cursor: pointer; color: #94a3b8; padding: 5px; z-index: 10;">
+                            <i class="fa-solid fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Confirm New Password -->
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="confirm-password" style="display: block; margin-bottom: 6px;">Confirm new password</label>
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input type="password" id="confirm-password" class="form-control" required style="width: 100%; padding: 10px 40px 10px 12px;">
+                        <span class="toggle-pwd-btn" data-target="confirm-password" style="position: absolute; right: 12px; cursor: pointer; color: #94a3b8; padding: 5px; z-index: 10;">
+                            <i class="fa-solid fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <button type="submit" class="primary-button">Change password</button>
+            </form>
+        </section>
+    `;
+
+        document.getElementById("change-password-form").addEventListener("submit", async event => {
             event.preventDefault();
             const form = event.currentTarget;
             const button = form.querySelector("button[type=submit]");
-            const values = new FormData(form);
+            const currentPassword = document.getElementById("current-password").value;
+            const newPassword = document.getElementById("new-password").value;
+            const confirmPassword = document.getElementById("confirm-password").value;
             button.disabled = true;
             try {
-                const result = await api("/auth/profile", { method: "PATCH", body: JSON.stringify({ name: values.get("name"), email: values.get("email") }) });
-                currentUser = { ...currentUser, ...result.user };
-                updateChrome("account");
-                showNotice("Profile updated.");
-                await renderAccount();
-            } catch (error) { showNotice(error.message, "error"); }
-            finally { button.disabled = false; }
-        });
-
-        document.getElementById("password-form").addEventListener("submit", async event => {
-            event.preventDefault();
-            const form = event.currentTarget;
-            const button = form.querySelector("button[type=submit]");
-            const values = new FormData(form);
-            button.disabled = true;
-            try {
-                await api("/auth/password", { method: "PATCH", body: JSON.stringify(Object.fromEntries(values)) });
+                await api("/auth/password", { method: "PATCH", body: JSON.stringify({ currentPassword, newPassword, confirmPassword }) });
                 csrfToken = null;
                 form.reset();
                 showNotice("Password changed. Other sessions have been signed out.");
@@ -662,4 +690,49 @@ document.addEventListener("DOMContentLoaded", () => {
         updateChrome(currentPage());
         renderPage(currentPage());
     }).catch(() => window.location.replace("/login.html"));
+});
+// Password Visibility Toggle Function
+function togglePasswordVisibility(fieldId, button) {
+    const inputField = document.getElementById(fieldId);
+    if (!inputField) return;
+    const icon = button.querySelector('i');
+    
+    if (inputField.type === "password") {
+        inputField.type = "text";
+        if (icon) {
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        }
+    } else {
+        inputField.type = "password";
+        if (icon) {
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+}
+// Secure Event Listener for Password Toggle (Bypasses CSP restrictions)
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.toggle-pwd-btn');
+    if (!btn) return;
+    
+    const targetId = btn.getAttribute('data-target');
+    const inputField = document.getElementById(targetId);
+    if (!inputField) return;
+    
+    const icon = btn.querySelector('i');
+    
+    if (inputField.type === 'password') {
+        inputField.type = 'text';
+        if (icon) {
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        }
+    } else {
+        inputField.type = 'password';
+        if (icon) {
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
 });

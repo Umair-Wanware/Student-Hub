@@ -15,11 +15,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-        const csrfResponse = await fetch("/api/auth/csrf", { credentials: "same-origin" });
+        // 'same-origin' ki jagah 'include' kiya taaki alag port par bhi cookies bhej sake
+        const csrfResponse = await fetch("/api/auth/csrf", { credentials: "include" });
         const csrfPayload = await csrfResponse.json();
         if (!csrfResponse.ok || !csrfPayload.success) throw new Error("Could not start a secure session.");
         csrfToken = csrfPayload.csrfToken;
-        const sessionResponse = await fetch("/api/auth/me", { credentials: "same-origin" });
+        
+        const sessionResponse = await fetch("/api/auth/me", { credentials: "include" });
         if (sessionResponse.ok) window.location.replace("/");
     } catch {
         message.textContent = "Could not connect. Check your connection and try again.";
@@ -49,7 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         try {
             const response = await fetch(`/api/auth/${form.dataset.mode}`, {
                 method: "POST",
-                credentials: "same-origin",
+                credentials: "include", // Yahan bhi 'include' kar diya
                 headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken },
                 body: JSON.stringify(values)
             });
